@@ -8,6 +8,13 @@
       "when": 1769586834181,
       "tag": "0000_wise_thunderbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770453000208,
+      "tag": "0001_graceful_tinkerer",
+      "breakpoints": true
     }
   ]
 }

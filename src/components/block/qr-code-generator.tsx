@@ -1,0 +1,673 @@
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import QRCodeStyling, { FileExtension, Options as QRCodeOptions, DotType, CornerSquareType } from "qr-code-styling";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
+import { Download, Palette, Shapes, Image as ImageIcon, LayoutGrid, Loader2, Link as LinkIcon, Save, Smartphone, QrCode, Ticket, Briefcase, LayoutTemplate, AppWindow, Wifi, MapPin, CreditCard, Mail, Phone, MessageSquare, MessageCircle, Calendar, Utensils, Megaphone, FileText, Users, Contact, Trash2 } from "lucide-react";
+import { ALL_STYLES as PREMIUM_STYLES, QR_CATEGORIES, QRStyle } from "@/lib/qr-styles";
+import { cn } from "@/lib/utils";
+import { createQRCode, updateQRCode } from "@/actions/qr-actions";
+import { getUploadUrl } from "@/actions/upload-actions";
+import { toast } from "sonner";
+import { QR_PAGE_TYPE } from "@/config/qr";
+import { PageBuilderForm } from "@/components/block/page-builder-form";
+import { PagePreview } from "@/components/block/page-preview";
+import { DEFAULT_BUSINESS_CARD, DEFAULT_COUPON, DEFAULT_MENU, DEFAULT_EVENT_PAGE, DEFAULT_MARKETING, DEFAULT_TEXT_PAGE } from "@/config/qr-page-builder";
+
+
+function InputField({ name, placeholder, label, value, onChange, type = "text", }: {
+    name: string;
+    placeholder: string;
+    label: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    type?: string;
+}) {
+    return (
+        <div className="space-y-2">
+            <Label htmlFor={name}>{label}</Label>
+            <Input
+                id={name}
+                type={type}
+                placeholder={placeholder}
+                value={value}
+                onChange={onChange}
+            />
+        </div>
+    );
+}
+
+
+
+
+
+export default function QRCodeGenerator() {
+    const [title, setTitle] = useState("Untitled QR");
+    const [expiresAt, setExpiresAt] = useState("");
+    const [type, setType] = useState<QRType>("url");
+    const [data, setData] = useState<any>({});
+    const [selectedStyle, setSelectedStyle] = useState<string>("classic-black");
+    const [customOptions, setCustomOptions] = useState<Partial<QRCodeOptions>>({});
+
+    // Dynamic QR State
+    const [isSaving, setIsSaving] = useState(false);
+    const [shortUrl, setShortUrl] = useState<string | null>(null);
+    const [rightTab, setRightTab] = useState<"qr" | "preview">("preview");
+    const [step, setStep] = useState<1 | 2>(1);
+    const [shortId, setShortId] = useState<string | null>(null);
+    const [logoFile, setLogoFile] = useState<File | null>(null); // To store selected file for upload
+
+
+    const ref = useRef<HTMLDivElement>(null);
+    const qrCodeRef = useRef<QRCodeStyling | null>(null);
+
+    // Callback ref to handle DOM node availability
+    const [qrContainer, setQrContainer] = useState<HTMLDivElement | null>(null);
+    const onRefChange = React.useCallback((node: HTMLDivElement | null) => {
+        setQrContainer(node);
+    }, []);
+
+    // Initialize & Attach QR Code
+    useEffect(() => {
+        // 1. Ensure Instance Exists
+        if (!qrCodeRef.current) {
+            qrCodeRef.current = new QRCodeStyling({
+                width: 300,
+                height: 300,
+                image: "",
+                dotsOptions: { color: "#000000", type: "rounded" },
+                imageOptions: { crossOrigin: "anonymous", margin: 20 },
+            });
+        }
+
+        // 2. Append to Container if available
+        if (qrContainer && qrCodeRef.current) {
+            qrContainer.innerHTML = "";
+            qrCodeRef.current.append(qrContainer);
+
+            // 3. FORCE UPDATE: Ensure it renders immediately after appending
+            if (shortUrl) {
+                const templateOptions = PREMIUM_STYLES.find(s => s.name === selectedStyle)?.options || {};
+                const finalOptions: Partial<QRCodeOptions> = {
+                    data: shortUrl,
+                    ...templateOptions,
+                    ...customOptions,
+                    dotsOptions: { ...templateOptions.dotsOptions, ...customOptions.dotsOptions },
+                    cornersSquareOptions: { ...templateOptions.cornersSquareOptions, ...customOptions.cornersSquareOptions },
+                    cornersDotOptions: { ...templateOptions.cornersDotOptions, ...customOptions.cornersDotOptions },
+                    backgroundOptions: { ...templateOptions.backgroundOptions, ...customOptions.backgroundOptions },
+                    imageOptions: { ...templateOptions.imageOptions, ...customOptions.imageOptions },
+                };
+                qrCodeRef.current.update(finalOptions);
+            }
+        }
+    }, [qrContainer, rightTab]); // Re-run when container mounts or tab changes
+
+    // React to Option Changes (Updates existing instance)
+    useEffect(() => {
+        if (!qrCodeRef.current || !shortUrl) return;
+
+        const templateOptions = PREMIUM_STYLES.find(s => s.name === selectedStyle)?.options || {};
+        const finalOptions: Partial<QRCodeOptions> = {
+            data: shortUrl,
+            ...templateOptions,
+            ...customOptions,
+            dotsOptions: { ...templateOptions.dotsOptions, ...customOptions.dotsOptions },
+            cornersSquareOptions: { ...templateOptions.cornersSquareOptions, ...customOptions.cornersSquareOptions },
+            cornersDotOptions: { ...templateOptions.cornersDotOptions, ...customOptions.cornersDotOptions },
+            backgroundOptions: { ...templateOptions.backgroundOptions, ...customOptions.backgroundOptions },
+            imageOptions: { ...templateOptions.imageOptions, ...customOptions.imageOptions },
+        };
+
+        qrCodeRef.current.update(finalOptions);
+    }, [shortUrl, selectedStyle, customOptions]);
+
+    const handleDownload = (extension: FileExtension) => {
+        if (qrCodeRef.current) {
+            qrCodeRef.current.download({ extension });
+        }
+    };
+
+    // ts-safe heleper function
+    const isQrPageType = (type: QRType): type is QrPageType => {
+        return QR_PAGE_TYPE.includes(type as QrPageType);
+    };
+
+
+    const handleCreate = async () => {
+        if (!title) {
+            toast.error("Please enter a title for your QR code");
+            return;
+        }
+        setIsSaving(true);
+        try {
+            // Prepare dynamic data
+            let dynamicPayload: any = { ...data };
+            if (type === "url" && data.value && !data.value.startsWith("http")) {
+                dynamicPayload.value = `https://${data.value}`;
+            }
+
+            // For Pages, dynamicPayload IS the data object already (CouponData / BusinessCardData)
+
+            // Step 1: Create Draft
+            const result = await createQRCode({
+                title: title || "Untitled QR",
+                type: type,
+                dynamicData: dynamicPayload,
+                designStats: { selectedStyle, customOptions }, // Initial design stats (default)
+                expiresAt: expiresAt ? new Date(expiresAt) : null,
+            });
+
+            if (result.success && result.id) {
+                setShortId(result.id);
+                // Set QR data to the short URL
+                const domain = process.env.NEXT_PUBLIC_SHORT_DOMAIN;
+                const finalUrl = `${domain}/${result.id}`;
+                setShortUrl(finalUrl);
+                setStep(2);
+                setRightTab("qr");
+                toast.success("Content saved! Now customize your design.");
+            } else {
+                toast.error(result.error || "Failed to create draft");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Something went wrong");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleFinalSave = async () => {
+        if (!shortId) return;
+        setIsSaving(true); // Reusing isSaving for loading state
+
+        try {
+            let finalCustomOptions = { ...customOptions };
+
+            // Step 2a: Upload Image to R2 if selected
+            if (logoFile) {
+                const uploadRes = await getUploadUrl(logoFile.type);
+                if (uploadRes.success && uploadRes.uploadUrl && uploadRes.publicUrl) {
+                    // Upload the file directly to R2
+                    const response = await fetch(uploadRes.uploadUrl, {
+                        method: "PUT",
+                        body: logoFile,
+                        headers: {
+                            "Content-Type": logoFile.type
+                        }
+                    });
+
+                    if (response.ok) {
+                        // Use the public URL for the QR code options
+                        finalCustomOptions.image = uploadRes.publicUrl;
+                        setCustomOptions(prev => ({ ...prev, image: uploadRes.publicUrl }));
+                        toast.success("Logo uploaded successfully");
+                    } else {
+                        console.error("Upload failed", response.status, response.statusText);
+                        toast.error("Failed to upload logo, staying with preview");
+                    }
+                } else {
+                    toast.error("Failed to get upload URL");
+                }
+            }
+
+            // Step 2b: Update Database with Final Design and Mark Complete
+            const result = await updateQRCode(shortId, {
+                designStats: { selectedStyle, customOptions: finalCustomOptions },
+                isComplete: true
+            });
+
+            if (result.success) {
+                toast.success("QR Code Published!");
+                setLogoFile(null); // Clear selected file
+                // Optional: redirect or change UI state to 'done'
+                // router.push("/dashboard"); 
+            } else {
+                toast.error(result.error || "Failed to publish");
+            }
+
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to publish");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleChange = (name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        setData((prev: any) => ({ ...prev, [name]: e.target.value }));
+    };
+
+    const updateCustomOption = (category: keyof QRCodeOptions, key: string, value: any) => {
+        setCustomOptions(prev => ({
+            ...prev,
+            [category]: { ...(prev[category] as any || {}), [key]: value }
+        }));
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setLogoFile(file); // Store file for upload on save
+            const reader = new FileReader();
+            reader.onload = () => {
+                setCustomOptions(prev => ({ ...prev, image: reader.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+
+    // Social Media State Helper
+    const addPlatform = () => {
+        setData((prev: any) => ({
+            ...prev,
+            platforms: [...(prev.platforms || []), { platform: "instagram", url: "" }]
+        }));
+    };
+
+    const updatePlatform = (index: number, key: "platform" | "url", value: string) => {
+        setData((prev: any) => {
+            const newPlatforms = [...(prev.platforms || [])];
+            newPlatforms[index] = { ...newPlatforms[index], [key]: value };
+            return { ...prev, platforms: newPlatforms };
+        });
+    };
+
+    const removePlatform = (index: number) => {
+        setData((prev: any) => ({
+            ...prev,
+            platforms: prev.platforms.filter((_: any, i: number) => i !== index)
+        }));
+    };
+
+    const handleTypeChange = (t: QRType) => {
+        setType(t);
+        setShortUrl(null);
+
+        // Initialize defaults
+        if (t === "couponPage") {
+            setData(DEFAULT_COUPON);
+            setRightTab("preview");
+        } else if (t === "businessCard") {
+            setData(DEFAULT_BUSINESS_CARD);
+            setRightTab("preview");
+        } else if (t === "menuCard") {
+            setData(DEFAULT_MENU);
+            setRightTab("preview");
+        } else if (t === "eventPage") {
+            setData(DEFAULT_EVENT_PAGE);
+            setRightTab("preview");
+        } else if (t === "marketingPage") {
+            setData(DEFAULT_MARKETING);
+            setRightTab("preview");
+        } else if (t === "textPage") {
+            setData(DEFAULT_TEXT_PAGE);
+            setRightTab("preview");
+        } else if (t === "social") {
+            setData({ platforms: [{ platform: "instagram", url: "" }] });
+            setRightTab("preview");
+        } else if (t === "app") {
+            setData({ ios: "", android: "", fallback: "" });
+            setRightTab("preview");
+        } else if (t === "payment") {
+            setData({ recipient: "", amount: "", currency: "USD" });
+            setRightTab("preview");
+        } else {
+            setData({});
+            setRightTab("preview");
+        }
+    };
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-7xl mx-auto p-4">
+
+            {/* LEFT COLUMN: Configuration */}
+            <div className="lg:col-span-7 space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>QR Configuration</CardTitle>
+                        <CardDescription>Step-by-step customization.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Tabs defaultValue="content" value={step === 1 ? "content" : "customize"} className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 mb-6">
+                                <TabsTrigger value="content" disabled={step === 2}><LayoutGrid className="w-4 h-4 mr-2" /> Content</TabsTrigger>
+                                <TabsTrigger value="customize" disabled={step === 1}><Palette className="w-4 h-4 mr-2" /> Design</TabsTrigger>
+                            </TabsList>
+
+                            {/* STEP 1: CONTENT */}
+                            <TabsContent value="content" className="space-y-6">
+                                {/* Global Settings */}
+                                <div className="p-4 bg-muted/50 rounded-lg border space-y-4">
+                                    <h3 className="text-sm font-semibold">General Settings</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="qr-title">Campaign Title</Label>
+                                            <Input id="qr-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Summer Sale 2024" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="qr-expiry">Expiration (Optional)</Label>
+                                            <Input id="qr-expiry" type="datetime-local" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Type Categories */}
+                                <Tabs defaultValue="redirects" className="w-full">
+                                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                                        <TabsTrigger value="redirects">Smart Redirects</TabsTrigger>
+                                        <TabsTrigger value="pages">Hosted Pages</TabsTrigger>
+                                    </TabsList>
+
+                                    <TabsContent value="redirects" className="space-y-4">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                            <Button variant={type === "url" ? "default" : "outline"} onClick={() => handleTypeChange("url")} className="justify-start"><LinkIcon className="w-4 h-4 mr-2" /> URL</Button>
+                                            <Button variant={type === "social" ? "default" : "outline"} onClick={() => handleTypeChange("social")} className="justify-start"><Users className="w-4 h-4 mr-2" /> Social Bio</Button>
+                                            <Button variant={type === "app" ? "default" : "outline"} onClick={() => handleTypeChange("app")} className="justify-start"><AppWindow className="w-4 h-4 mr-2" /> App Store</Button>
+                                            <Button variant={type === "location" ? "default" : "outline"} onClick={() => handleTypeChange("location")} className="justify-start"><MapPin className="w-4 h-4 mr-2" /> Location</Button>
+                                            <Button variant={type === "payment" ? "default" : "outline"} onClick={() => handleTypeChange("payment")} className="justify-start"><CreditCard className="w-4 h-4 mr-2" /> Payment</Button>
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="pages" className="space-y-4">
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <Button variant={type === "businessCard" ? "default" : "outline"} onClick={() => handleTypeChange("businessCard")} className="justify-start"><Briefcase className="w-4 h-4 mr-2" /> Business Card</Button>
+                                            <Button variant={type === "couponPage" ? "default" : "outline"} onClick={() => handleTypeChange("couponPage")} className="justify-start"><Ticket className="w-4 h-4 mr-2" /> Coupon</Button>
+                                            <Button variant={type === "menuCard" ? "default" : "outline"} onClick={() => handleTypeChange("menuCard")} className="justify-start"><Utensils className="w-4 h-4 mr-2" /> Menu</Button>
+                                            <Button variant={type === "eventPage" ? "default" : "outline"} onClick={() => handleTypeChange("eventPage")} className="justify-start"><Calendar className="w-4 h-4 mr-2" /> Event Page</Button>
+                                            <Button variant={type === "marketingPage" ? "default" : "outline"} onClick={() => handleTypeChange("marketingPage")} className="justify-start"><Megaphone className="w-4 h-4 mr-2" /> Marketing</Button>
+                                            <Button variant={type === "textPage" ? "default" : "outline"} onClick={() => handleTypeChange("textPage")} className="justify-start"><FileText className="w-4 h-4 mr-2" /> Text Page</Button>
+                                        </div>
+                                    </TabsContent>
+                                </Tabs>
+
+                                {/* INPUT FIELDS */}
+                                <div className="pt-4 border-t">
+
+                                    {isQrPageType(type) ?
+                                        (
+                                            <PageBuilderForm type={type} data={data} onChange={setData} />
+                                        ) : (
+                                            <div className="space-y-4">
+                                                {type === "url" && <InputField name="value" label={type === "url" ? "Website URL" : "Text"} placeholder="Enter content..." value={data.value || ""} onChange={handleChange("value")} />}
+
+                                                {type === "social" && (
+                                                    <div className="space-y-4">
+                                                        <div className="flex justify-between items-center">
+                                                            <Label>Social Platforms</Label>
+                                                            <Button variant="outline" size="sm" onClick={addPlatform}>+ Add Platform</Button>
+                                                        </div>
+                                                        <div className="space-y-3">
+                                                            {data.platforms?.map((p: any, i: number) => (
+                                                                <div key={i} className="flex gap-2 items-start">
+                                                                    <div className="grid grid-cols-3 gap-2 w-full">
+                                                                        <select
+                                                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                                                                            value={p.platform}
+                                                                            onChange={(e) => updatePlatform(i, "platform", e.target.value)}
+                                                                        >
+                                                                            <option value="instagram">Instagram</option>
+                                                                            <option value="facebook">Facebook</option>
+                                                                            <option value="twitter">X (Twitter)</option>
+                                                                            <option value="linkedin">LinkedIn</option>
+                                                                            <option value="tiktok">TikTok</option>
+                                                                            <option value="youtube">YouTube</option>
+                                                                            <option value="github">GitHub</option>
+                                                                            <option value="website">Website</option>
+                                                                        </select>
+                                                                        <Input
+                                                                            placeholder="URL"
+                                                                            value={p.url}
+                                                                            onChange={(e) => updatePlatform(i, "url", e.target.value)}
+                                                                            className="col-span-2"
+                                                                        />
+                                                                    </div>
+                                                                    <Button variant="ghost" size="icon" onClick={() => removePlatform(i)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {type === "app" && (
+                                                    <div className="space-y-4">
+                                                        <InputField name="ios" label="iOS App Store URL" placeholder="https://apps.apple.com/..." value={data.ios || ""} onChange={handleChange("ios")} />
+                                                        <InputField name="android" label="Google Play Store URL" placeholder="https://play.google.com/..." value={data.android || ""} onChange={handleChange("android")} />
+                                                        <InputField name="fallback" label="Fallback URL (Web)" placeholder="https://myapp.com" value={data.fallback || ""} onChange={handleChange("fallback")} />
+                                                    </div>
+                                                )}
+
+                                                {type === "payment" && (
+                                                    <div className="space-y-4">
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <InputField name="recipient" label="Recipient Name" placeholder="Business Name" value={data.recipient || ""} onChange={handleChange("recipient")} />
+                                                            <div className="space-y-2">
+                                                                <Label>Amount (Fixed)</Label>
+                                                                <div className="flex gap-2">
+                                                                    <Input className="w-20" placeholder="$" value={data.currency || "USD"} onChange={handleChange("currency")} />
+                                                                    <Input placeholder="10.00" value={data.amount || ""} onChange={handleChange("amount")} />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <InputField name="paypal" label="PayPal Username" placeholder="username" value={data.paypal || ""} onChange={handleChange("paypal")} />
+                                                        <InputField name="upi" label="UPI ID (India)" placeholder="user@upi" value={data.upi || ""} onChange={handleChange("upi")} />
+                                                    </div>
+                                                )}
+
+                                                {/* Existing Types */}
+
+                                                {type === "location" && (
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <InputField name="latitude" label="Latitude" placeholder="40.7128" value={data.latitude || ""} onChange={handleChange("latitude")} />
+                                                        <InputField name="longitude" label="Longitude" placeholder="-74.0060" value={data.longitude || ""} onChange={handleChange("longitude")} />
+                                                    </div>
+                                                )}
+
+                                            </div>
+                                        )}
+                                </div>
+
+                                <Button onClick={handleCreate} className="w-full mt-6" disabled={isSaving}>
+                                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                    Create
+                                </Button>
+                            </TabsContent>
+
+                            {/* STEP 2: DESIGN/CUSTOMIZE */}
+                            <TabsContent value="customize" className="space-y-8">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold">Customize QR Code</h3>
+                                </div>
+
+                                {/* 0. Presets */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-semibold flex items-center gap-2"><LayoutTemplate className="w-4 h-4" /> Templates</h3>
+                                    <div className="space-y-4 max-h-96 overflow-y-auto pr-2 border rounded-lg p-2 bg-muted/20">
+                                        {QR_CATEGORIES.map((cat) => (
+                                            <div key={cat.id} className="space-y-2">
+                                                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider sticky top-0 bg-background/95 p-1 backdrop-blur-sm z-10">{cat.label}</h4>
+                                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                                                    {cat.styles.map((style) => (
+                                                        <button
+                                                            key={style.name}
+                                                            onClick={() => setSelectedStyle(style.name)}
+                                                            className={cn(
+                                                                "flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all hover:bg-accent",
+                                                                selectedStyle === style.name ? "border-primary bg-accent" : "border-transparent bg-background"
+                                                            )}
+                                                        >
+                                                            {/* We could render a mini preview here if we wanted, but for now just text/icon */}
+                                                            <div className="w-8 h-8 rounded mb-2 bg-linear-to-br from-gray-100 to-gray-300 dark:from-gray-800 dark:to-gray-900 border flex items-center justify-center">
+                                                                {/* Simple visual indicator based on style props? Too complex for now. */}
+                                                                <div
+                                                                    className="w-4 h-4 rounded-sm"
+                                                                    style={{
+                                                                        background: style.options.dotsOptions?.color || style.options.backgroundOptions?.color || "#000"
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            <span className="text-xs font-medium truncate w-full text-center">{style.label}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* 1. Colors */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-semibold flex items-center gap-2"><Palette className="w-4 h-4" /> Colors</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label>Dots Color</Label>
+                                            <div className="flex gap-2">
+                                                <Input type="color" className="w-12 h-9 p-1" onChange={(e) => updateCustomOption('dotsOptions', 'color', e.target.value)} />
+                                                <Input placeholder="#000000" onChange={(e) => updateCustomOption('dotsOptions', 'color', e.target.value)} />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Background</Label>
+                                            <div className="flex gap-2">
+                                                <Input type="color" className="w-12 h-9 p-1" onChange={(e) => updateCustomOption('backgroundOptions', 'color', e.target.value)} />
+                                                <Input placeholder="#ffffff" onChange={(e) => updateCustomOption('backgroundOptions', 'color', e.target.value)} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 2. Shapes */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-semibold flex items-center gap-2"><Shapes className="w-4 h-4" /> Shapes</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label>Dots Style</Label>
+                                            <select className="w-full p-2 border rounded-md bg-background" onChange={(e) => updateCustomOption('dotsOptions', 'type', e.target.value as DotType)}>
+                                                <option value="square">Square</option>
+                                                <option value="dots">Dots</option>
+                                                <option value="rounded">Rounded</option>
+                                                <option value="extra-rounded">Extra Rounded</option>
+                                                <option value="classy">Classy</option>
+                                                <option value="classy-rounded">Classy Rounded</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Corner Style</Label>
+                                            <select className="w-full p-2 border rounded-md bg-background" onChange={(e) => updateCustomOption('cornersSquareOptions', 'type', e.target.value as CornerSquareType)}>
+                                                <option value="square">Square</option>
+                                                <option value="dot">Dot</option>
+                                                <option value="extra-rounded">Extra Rounded</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 3. Logo/Image */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-semibold flex items-center gap-2"><ImageIcon className="w-4 h-4" /> Logo</h3>
+                                    <div className="space-y-3">
+                                        <Label>Upload Logo</Label>
+                                        <Input type="file" accept="image/*" onChange={handleImageUpload} />
+                                        <div className="space-y-2">
+                                            <Label>Logo Margin</Label>
+                                            <Slider defaultValue={[0]} max={20} step={1} onValueChange={(vals) => updateCustomOption('imageOptions', 'margin', vals[0])} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <Button onClick={handleFinalSave} className="w-full mt-6" size="lg" disabled={isSaving}>
+                                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                    Save & Publish
+                                </Button>
+                            </TabsContent>
+                        </Tabs>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* RIGHT COLUMN: Preview */}
+            <div className="lg:col-span-5">
+                <div className="sticky top-6 space-y-4">
+                    <Tabs value={rightTab} onValueChange={(v) => setRightTab(v as "qr" | "preview")} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="qr" disabled={!shortUrl}><QrCode className="w-4 h-4 mr-2" /> QR Code</TabsTrigger>
+                            <TabsTrigger value="preview"><Smartphone className="w-4 h-4 mr-2" /> Live Preview</TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="qr" className="mt-4">
+                            <Card className="overflow-hidden border-2 border-primary/10 shadow-xl bg-zinc-50/50 dark:bg-zinc-900/50 backdrop-blur-sm">
+                                <CardContent className="flex flex-col items-center justify-center p-8 min-h-96">
+                                    <div ref={onRefChange} className="bg-white p-4 rounded-xl shadow-sm" />
+                                    {shortUrl ? (
+                                        <div className="mt-6 text-center space-y-2 w-full">
+                                            <div className="bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium flex items-center justify-center gap-2">
+                                                <LinkIcon className="w-4 h-4" /> Active Dynamic Link
+                                            </div>
+                                            <p className="text-xs text-muted-foreground break-all select-all font-mono bg-muted p-2 rounded">
+                                                {shortUrl}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <p className="mt-6 text-sm text-muted-foreground text-center animate-pulse">
+                                            Scanning for greatness...
+                                        </p>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            <div className="mt-4 grid grid-cols-2 gap-3">
+                                {shortUrl && (
+                                    <>
+                                        <Button onClick={() => handleDownload("png")} className="w-full" size="lg">
+                                            <Download className="w-4 h-4 mr-2" /> PNG
+                                        </Button>
+                                        <Button onClick={() => handleDownload("svg")} variant="outline" className="w-full" size="lg">
+                                            <Download className="w-4 h-4 mr-2" /> SVG
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="preview" className="mt-4">
+                            <Card className="border-none shadow-none bg-transparent">
+                                <CardContent className="p-0">
+
+                                    {/* Live preview for Pages */}
+                                    {isQrPageType(type) ? (
+                                        <PagePreview type={type} data={data} />
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center h-96 border-2 border-dashed rounded-xl bg-muted/30">
+                                            <div className="text-center text-muted-foreground p-6">
+                                                <Smartphone className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                                                <h3 className="text-lg font-semibold mb-2">Live Preview</h3>
+                                                <p className="text-sm max-w-xs mx-auto">
+                                                    Enter your content and click "Next" to generate your dynamic QR code.
+
+                                                    {/* Show Redirect preview only for url */}
+                                                    {type === "url" && data.value && (
+                                                        <div className="mt-4 p-2 bg-background border rounded text-xs break-all">
+                                                            Redirects to: <br />
+                                                            <span className="text-primary">{data.value.startsWith("http") ? data.value : `https://${data.value}`}</span>
+                                                        </div>
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
+                </div>
+            </div>
+        </div >
+    );
+}

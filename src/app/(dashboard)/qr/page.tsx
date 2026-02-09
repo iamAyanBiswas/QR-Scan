@@ -1,0 +1,1 @@
+//basically for edir QRs

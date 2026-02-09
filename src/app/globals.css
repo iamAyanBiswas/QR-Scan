@@ -186,4 +186,239 @@
   body {
     @apply bg-background text-foreground;
   }
+
+}
+
+
+
+
+
+
+
+/* custom */
+
+/* ===== Editor.js + Tailwind Dark Mode ===== */
+
+
+.dark .ce-popover,
+.dark .ce-popover-item,
+.dark .ce-popover-item__icon,
+.dark .ce-popover-items,
+.dark .ce-popover__container .dark .ce-popover-item:hover {
+  --color-background-item-hover: var(--background);
+  background-color: var(--background);
+  border-color: var(--border);
+  background: var(--background);
+}
+
+.dark .ce-popover__container {
+  background: var(--background);
+}
+
+
+.dark .ce-popover--opened>.ce-popover__container {
+  border: 1px solid var(--border);
+}
+
+.dark .ce-popover-item-separator__line {
+  border: 1px solid var(--border);
+}
+
+.dark .ce-toolbar__plus,
+.dark .ce-toolbar__settings-btn,
+.dark .ce-popover-item__title,
+.dark .ce-inline-tool .dark .ce-inline-tool--link .dark .ce-popover-item__icon {
+  color: var(--foreground);
+}
+
+.dark .cdx-search-field.ce-popover__search {
+  background-color: oklch(from var(--muted) l c h / 0.3);
+  border-color: var(--border);
+}
+
+.dark .cdx-search-field__input {
+  color: var(--foreground);
+}
+
+.dark .cdx-block,
+.dark .ce-block {
+  color: var(--foreground);
+}
+
+/* by ai */
+
+.ce-block__content {
+  max-width: unset;
+}
+
+.ce-toolbar__content {
+  max-width: unset;
+}
+
+.codex-editor__redactor {
+  padding-bottom: 0 !important;
+}
+
+#editorjs {
+  font-weight: 400;
+  /* Matching standard textarea weight */
+}
+
+/* EditorJS Header Styling - Target within prose to override defaults */
+.prose h1.ce-header {
+  font-size: 2.25rem !important;
+  /* text-4xl */
+  line-height: 2.5rem !important;
+  font-weight: 700 !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.8rem !important;
+}
+
+.prose h2.ce-header {
+  font-size: 1.875rem !important;
+  /* text-3xl */
+  line-height: 2.25rem !important;
+  font-weight: 700 !important;
+  margin-top: 1.4rem !important;
+  margin-bottom: 0.7rem !important;
+}
+
+.prose h3.ce-header {
+  font-size: 1.5rem !important;
+  /* text-2xl */
+  line-height: 2rem !important;
+  font-weight: 600 !important;
+  margin-top: 1.2rem !important;
+  margin-bottom: 0.6rem !important;
+}
+
+.prose h4.ce-header {
+  font-size: 1.25rem !important;
+  /* text-xl */
+  line-height: 1.75rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.prose h5.ce-header {
+  font-size: 1.125rem !important;
+  /* text-lg */
+  line-height: 1.5rem !important;
+  font-weight: 600 !important;
+}
+
+.prose h6.ce-header {
+  font-size: 1rem !important;
+  /* text-base */
+  line-height: 1.5rem !important;
+  font-weight: 600 !important;
+}
+
+/* EditorJS Link Styling */
+.codex-editor__redactor a {
+  color: oklch(0.627 0.265 303.9);
+  /* Use chart-4 or a nice blue */
+  text-decoration: underline;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.dark .codex-editor__redactor a {
+  color: oklch(0.627 0.265 303.9);
+  /* Adjust for dark mode visibility */
+}
+
+/* Move toolbar icons inside the border - Desktop only */
+@media (min-width: 651px) {
+  .ce-block {
+    margin-left: 0 !important;
+  }
+
+  .ce-toolbar__plus {
+    left: 12px !important;
+  }
+
+  .ce-toolbar__settings-btn {
+    left: 12px !important;
+  }
+
+  .ce-block__content {
+    margin-left: 60px !important;
+  }
+
+  .ce-toolbar__content {
+    margin-left: 60px !important;
+  }
+}
+
+/* by ai */
+
+.dark .ce-inline-toolbar,
+.dark .ce-conversion-tool__icon,
+.dark .ce-popover-item__icon,
+.dark .tc-popover__item-icon {
+  color: var(--foreground);
+  background-color: var(--background);
+  border-color: var(--border);
+}
+
+.dark .ce-popover,
+.dark .ce-conversion-toolbar,
+.dark .ce-inline-toolbar,
+.dark .tc-popover {
+  background-color: var(--popover);
+  border-color: var(--border);
+  box-shadow: 0 3px 15px -3px oklch(from var(--border) l c h / 0.2);
+}
+
+.dark .ce-inline-tool {
+  color: var(--foreground);
+}
+
+.dark .ce-inline-tool-input {
+  background-color: var(--background);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+.dark .ce-inline-tool-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.dark .ce-inline-tool:hover,
+.dark .ce-inline-toolbar__dropdown:hover,
+.dark .ce-toolbar__plus:hover,
+.dark .ce-toolbar__settings-btn:hover,
+.dark .ce-conversion-tool:hover,
+.dark .ce-popover-item:hover {
+  background-color: oklch(from var(--accent) l c h / 0.2);
+}
+
+.dark *::selection,
+.dark .ce-block.ce-block--selected .ce-block__content {
+  background-color: oklch(from var(--primary) l c h / 0.3);
+}
+
+.dark .ce-popover__items {
+  scrollbar-color: var(--border) var(--background);
+}
+
+/* table class wrapper */
+.dark .tc-wrap,
+.dark .tc-wrap * {
+  --color-border: var(--border);
+  --color-text-secondary: var(--foreground);
+  --color-background: oklch(from var(--accent) l c h / 0.2);
+  --toggler-dots-color: oklch(from var(--accent) l c h / 0.2);
+  --toggler-dots-color-hovered: var(--foreground);
+}
+
+@media (max-width: 650px) {
+
+  .dark .ce-toolbar__settings-btn,
+  .dark .ce-toolbar__plus {
+    background-color: var(--popover);
+    border-color: var(--border);
+    box-shadow: 0 3px 15px -3px oklch(from var(--border) l c h / 0.2);
+  }
 }

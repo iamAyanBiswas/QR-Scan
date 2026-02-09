@@ -1,6 +1,6 @@
 "use client"
 
-import { LayoutDashboard, User } from "lucide-react"
+import { LayoutDashboard, QrCode, User } from "lucide-react"
 
 import {
     Sidebar,
@@ -12,6 +12,8 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { ModeToggle } from "@/components/custom/toggle"
+import { title } from "process"
 
 // Menu items.
 const items = [
@@ -25,6 +27,11 @@ const items = [
         url: "/profile",
         icon: User,
     },
+    {
+        title: 'QR',
+        url: '/qr/create',
+        icon: QrCode
+    }
 ]
 
 export function AppSidebar() {
@@ -45,6 +52,11 @@ export function AppSidebar() {
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}
+                        </SidebarMenu>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <ModeToggle />
+                            </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
