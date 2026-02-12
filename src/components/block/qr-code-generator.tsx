@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
-import { Download, Palette, Shapes, Image as ImageIcon, LayoutGrid, Loader2, Link as LinkIcon, Save, Smartphone, QrCode, Ticket, Briefcase, LayoutTemplate, AppWindow, Wifi, MapPin, CreditCard, Mail, Phone, MessageSquare, MessageCircle, Calendar, Utensils, Megaphone, FileText, Users, Contact, Trash2 } from "lucide-react";
+import { Download, Palette, Shapes, Image as ImageIcon, LayoutGrid, Loader2, Link as LinkIcon, Save, Smartphone, QrCode, Ticket, Briefcase, LayoutTemplate, AppWindow, Wifi, MapPin, CreditCard, Mail, Phone, MessageSquare, MessageCircle, Calendar, Utensils, Megaphone, FileText, Users, Contact, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import { ALL_STYLES as PREMIUM_STYLES, QR_CATEGORIES, QRStyle } from "@/lib/qr-styles";
 import { cn } from "@/lib/utils";
 import { createQRCode, updateQRCode } from "@/actions/qr-actions";
@@ -18,6 +18,21 @@ import { QR_PAGE_TYPE } from "@/config/qr";
 import { PageBuilderForm } from "@/components/block/page-builder-form";
 import { PagePreview } from "@/components/block/page-preview";
 import { DEFAULT_BUSINESS_CARD, DEFAULT_COUPON, DEFAULT_MENU, DEFAULT_EVENT_PAGE, DEFAULT_MARKETING, DEFAULT_TEXT_PAGE } from "@/config/qr-page-builder";
+import { StyleButton } from "@/components/custom/style-button";
+import {
+    DotsSquareIcon,
+    DotsRoundIcon,
+    DotsRoundedIcon,
+    DotsExtraRoundedIcon,
+    DotsClassyIcon,
+    DotsClassyRoundedIcon,
+    CornerSquareIcon,
+    CornerDotIcon,
+    CornerExtraRoundedIcon,
+    CornerNoneIcon,
+    CornerCenterSquareIcon,
+    CornerCenterDotIcon
+} from "@/components/custom/qr-style-icons";
 
 
 function InputField({ name, placeholder, label, value, onChange, type = "text", }: {
@@ -42,6 +57,25 @@ function InputField({ name, placeholder, label, value, onChange, type = "text", 
     );
 }
 
+function CustomAccordionItem({ title, icon, children }: { title: string, icon: React.ReactNode, children: React.ReactNode }) {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <div className="border rounded-lg overflow-hidden">
+            <button
+                className="w-full flex items-center justify-between p-3 bg-muted/30 hover:bg-muted/50 transition-colors"
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <div className="flex items-center gap-2 font-medium text-sm">
+                    {icon}
+                    {title}
+                </div>
+                {isOpen ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+            </button>
+            {isOpen && <div className="p-3 bg-background border-t animate-in slide-in-from-top-2 fade-in duration-200">{children}</div>}
+        </div>
+    );
+}
+
 
 
 
@@ -58,6 +92,20 @@ export default function QRCodeGenerator() {
     const [isSaving, setIsSaving] = useState(false);
     const [shortUrl, setShortUrl] = useState<string | null>(null);
     const [rightTab, setRightTab] = useState<"qr" | "preview">("preview");
+
+    const mergedOptions = React.useMemo(() => {
+        const templateOptions = PREMIUM_STYLES.find(s => s.name === selectedStyle)?.options || {};
+        return {
+            ...templateOptions,
+            ...customOptions,
+            dotsOptions: { ...templateOptions.dotsOptions, ...customOptions.dotsOptions },
+            cornersSquareOptions: { ...templateOptions.cornersSquareOptions, ...customOptions.cornersSquareOptions },
+            cornersDotOptions: { ...templateOptions.cornersDotOptions, ...customOptions.cornersDotOptions },
+            backgroundOptions: { ...templateOptions.backgroundOptions, ...customOptions.backgroundOptions },
+            imageOptions: { ...templateOptions.imageOptions, ...customOptions.imageOptions },
+        };
+    }, [selectedStyle, customOptions]);
+
     const [step, setStep] = useState<1 | 2>(1);
     const [shortId, setShortId] = useState<string | null>(null);
     const [logoFile, setLogoFile] = useState<File | null>(null); // To store selected file for upload
@@ -71,6 +119,8 @@ export default function QRCodeGenerator() {
     const onRefChange = React.useCallback((node: HTMLDivElement | null) => {
         setQrContainer(node);
     }, []);
+
+
 
     // Initialize & Attach QR Code
     useEffect(() => {
@@ -92,40 +142,26 @@ export default function QRCodeGenerator() {
 
             // 3. FORCE UPDATE: Ensure it renders immediately after appending
             if (shortUrl) {
-                const templateOptions = PREMIUM_STYLES.find(s => s.name === selectedStyle)?.options || {};
                 const finalOptions: Partial<QRCodeOptions> = {
                     data: shortUrl,
-                    ...templateOptions,
-                    ...customOptions,
-                    dotsOptions: { ...templateOptions.dotsOptions, ...customOptions.dotsOptions },
-                    cornersSquareOptions: { ...templateOptions.cornersSquareOptions, ...customOptions.cornersSquareOptions },
-                    cornersDotOptions: { ...templateOptions.cornersDotOptions, ...customOptions.cornersDotOptions },
-                    backgroundOptions: { ...templateOptions.backgroundOptions, ...customOptions.backgroundOptions },
-                    imageOptions: { ...templateOptions.imageOptions, ...customOptions.imageOptions },
+                    ...mergedOptions,
                 };
                 qrCodeRef.current.update(finalOptions);
             }
         }
-    }, [qrContainer, rightTab]); // Re-run when container mounts or tab changes
+    }, [qrContainer, rightTab, shortUrl, mergedOptions]); // Re-run when container mounts or tab changes
 
     // React to Option Changes (Updates existing instance)
     useEffect(() => {
         if (!qrCodeRef.current || !shortUrl) return;
 
-        const templateOptions = PREMIUM_STYLES.find(s => s.name === selectedStyle)?.options || {};
         const finalOptions: Partial<QRCodeOptions> = {
             data: shortUrl,
-            ...templateOptions,
-            ...customOptions,
-            dotsOptions: { ...templateOptions.dotsOptions, ...customOptions.dotsOptions },
-            cornersSquareOptions: { ...templateOptions.cornersSquareOptions, ...customOptions.cornersSquareOptions },
-            cornersDotOptions: { ...templateOptions.cornersDotOptions, ...customOptions.cornersDotOptions },
-            backgroundOptions: { ...templateOptions.backgroundOptions, ...customOptions.backgroundOptions },
-            imageOptions: { ...templateOptions.imageOptions, ...customOptions.imageOptions },
+            ...mergedOptions,
         };
 
         qrCodeRef.current.update(finalOptions);
-    }, [shortUrl, selectedStyle, customOptions]);
+    }, [shortUrl, mergedOptions]);
 
     const handleDownload = (extension: FileExtension) => {
         if (qrCodeRef.current) {
@@ -240,10 +276,12 @@ export default function QRCodeGenerator() {
         }
     };
 
+    // Data handle
     const handleChange = (name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
         setData((prev: any) => ({ ...prev, [name]: e.target.value }));
     };
 
+    //Design handle
     const updateCustomOption = (category: keyof QRCodeOptions, key: string, value: any) => {
         setCustomOptions(prev => ({
             ...prev,
@@ -251,6 +289,7 @@ export default function QRCodeGenerator() {
         }));
     };
 
+    //Design image handle
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -497,7 +536,10 @@ export default function QRCodeGenerator() {
                                                     {cat.styles.map((style) => (
                                                         <button
                                                             key={style.name}
-                                                            onClick={() => setSelectedStyle(style.name)}
+                                                            onClick={() => {
+                                                                setSelectedStyle(style.name);
+                                                                setCustomOptions({});
+                                                            }}
                                                             className={cn(
                                                                 "flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all hover:bg-accent",
                                                                 selectedStyle === style.name ? "border-primary bg-accent" : "border-transparent bg-background"
@@ -522,65 +564,323 @@ export default function QRCodeGenerator() {
                                     </div>
                                 </div>
 
-                                {/* 1. Colors */}
-                                <div className="space-y-4">
-                                    <h3 className="text-sm font-semibold flex items-center gap-2"><Palette className="w-4 h-4" /> Colors</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label>Dots Color</Label>
-                                            <div className="flex gap-2">
-                                                <Input type="color" className="w-12 h-9 p-1" onChange={(e) => updateCustomOption('dotsOptions', 'color', e.target.value)} />
-                                                <Input placeholder="#000000" onChange={(e) => updateCustomOption('dotsOptions', 'color', e.target.value)} />
+                                {/* 2. Dots */}
+                                <CustomAccordionItem title="Dots" icon={<LayoutGrid className="w-4 h-4" />}>
+                                    <div className="space-y-4 pt-2">
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-medium">Style</Label>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <StyleButton
+                                                    icon={<DotsSquareIcon />}
+                                                    label="square"
+                                                    isActive={mergedOptions.dotsOptions?.type === "square"}
+                                                    onClick={() => updateCustomOption('dotsOptions', 'type', 'square')}
+                                                />
+                                                <StyleButton
+                                                    icon={<DotsRoundIcon />}
+                                                    label="dots"
+                                                    isActive={mergedOptions.dotsOptions?.type === "dots"}
+                                                    onClick={() => updateCustomOption('dotsOptions', 'type', 'dots')}
+                                                />
+                                                <StyleButton
+                                                    icon={<DotsRoundedIcon />}
+                                                    label="rounded"
+                                                    isActive={mergedOptions.dotsOptions?.type === "rounded"}
+                                                    onClick={() => updateCustomOption('dotsOptions', 'type', 'rounded')}
+                                                />
+                                                <StyleButton
+                                                    icon={<DotsExtraRoundedIcon />}
+                                                    label="extra rounded"
+                                                    isActive={mergedOptions.dotsOptions?.type === "extra-rounded"}
+                                                    onClick={() => updateCustomOption('dotsOptions', 'type', 'extra-rounded')}
+                                                />
+                                                <StyleButton
+                                                    icon={<DotsClassyIcon />}
+                                                    label="classy"
+                                                    isActive={mergedOptions.dotsOptions?.type === "classy"}
+                                                    onClick={() => updateCustomOption('dotsOptions', 'type', 'classy')}
+                                                />
+                                                <StyleButton
+                                                    icon={<DotsClassyRoundedIcon />}
+                                                    label="classy rounded"
+                                                    isActive={mergedOptions.dotsOptions?.type === "classy-rounded"}
+                                                    onClick={() => updateCustomOption('dotsOptions', 'type', 'classy-rounded')}
+                                                />
                                             </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label>Background</Label>
-                                            <div className="flex gap-2">
-                                                <Input type="color" className="w-12 h-9 p-1" onChange={(e) => updateCustomOption('backgroundOptions', 'color', e.target.value)} />
-                                                <Input placeholder="#ffffff" onChange={(e) => updateCustomOption('backgroundOptions', 'color', e.target.value)} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                {/* 2. Shapes */}
-                                <div className="space-y-4">
-                                    <h3 className="text-sm font-semibold flex items-center gap-2"><Shapes className="w-4 h-4" /> Shapes</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label>Dots Style</Label>
-                                            <select className="w-full p-2 border rounded-md bg-background" onChange={(e) => updateCustomOption('dotsOptions', 'type', e.target.value as DotType)}>
-                                                <option value="square">Square</option>
-                                                <option value="dots">Dots</option>
-                                                <option value="rounded">Rounded</option>
-                                                <option value="extra-rounded">Extra Rounded</option>
-                                                <option value="classy">Classy</option>
-                                                <option value="classy-rounded">Classy Rounded</option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label>Corner Style</Label>
-                                            <select className="w-full p-2 border rounded-md bg-background" onChange={(e) => updateCustomOption('cornersSquareOptions', 'type', e.target.value as CornerSquareType)}>
-                                                <option value="square">Square</option>
-                                                <option value="dot">Dot</option>
-                                                <option value="extra-rounded">Extra Rounded</option>
-                                            </select>
+
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-medium">Color</Label>
+                                            <Tabs defaultValue={mergedOptions.dotsOptions?.gradient ? "gradient" : "solid"} onValueChange={(v) => {
+                                                if (v === "solid") {
+                                                    updateCustomOption('dotsOptions', 'gradient', undefined);
+                                                    updateCustomOption('dotsOptions', 'color', "#000000");
+                                                } else {
+                                                    updateCustomOption('dotsOptions', 'color', undefined);
+                                                    updateCustomOption('dotsOptions', 'gradient', {
+                                                        type: "linear",
+                                                        rotation: 0,
+                                                        colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }]
+                                                    });
+                                                }
+                                            }}>
+                                                <TabsList className="grid w-full grid-cols-2">
+                                                    <TabsTrigger value="solid">Solid</TabsTrigger>
+                                                    <TabsTrigger value="gradient">Gradient</TabsTrigger>
+                                                </TabsList>
+                                                <TabsContent value="solid" className="mt-3">
+                                                    <div className="flex gap-3">
+                                                        <Input type="color" className="w-14 h-10 p-1 cursor-pointer" value={mergedOptions.dotsOptions?.color || "#000000"} onChange={(e) => updateCustomOption('dotsOptions', 'color', e.target.value)} />
+                                                        <Input value={mergedOptions.dotsOptions?.color || "#000000"} onChange={(e) => updateCustomOption('dotsOptions', 'color', e.target.value)} className="font-mono" />
+                                                    </div>
+                                                </TabsContent>
+                                                <TabsContent value="gradient" className="mt-3 space-y-4">
+                                                    <div className="flex gap-3">
+                                                        <Button size="sm" variant={mergedOptions.dotsOptions?.gradient?.type === "linear" ? "default" : "outline"} onClick={() => {
+                                                            const current = mergedOptions.dotsOptions?.gradient || { colorStops: [], rotation: 0 };
+                                                            updateCustomOption('dotsOptions', 'gradient', { ...current, type: "linear" });
+                                                        }}>Linear</Button>
+                                                        <Button size="sm" variant={mergedOptions.dotsOptions?.gradient?.type === "radial" ? "default" : "outline"} onClick={() => {
+                                                            const current = mergedOptions.dotsOptions?.gradient || { colorStops: [], rotation: 0 };
+                                                            updateCustomOption('dotsOptions', 'gradient', { ...current, type: "radial" });
+                                                        }}>Radial</Button>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div className="space-y-2">
+                                                            <Label className="text-xs font-medium">Start Color</Label>
+                                                            <div className="flex gap-2">
+                                                                <Input
+                                                                    type="color"
+                                                                    className="w-12 h-9 p-1 cursor-pointer"
+                                                                    value={mergedOptions.dotsOptions?.gradient?.colorStops?.[0]?.color || "#000000"}
+                                                                    onChange={(e) => {
+                                                                        const current = mergedOptions.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
+                                                                        const newStops = [...(current.colorStops || [])];
+                                                                        newStops[0] = { offset: 0, color: e.target.value };
+                                                                        updateCustomOption('dotsOptions', 'gradient', { ...current, colorStops: newStops });
+                                                                    }}
+                                                                />
+                                                                <Input
+                                                                    value={mergedOptions.dotsOptions?.gradient?.colorStops?.[0]?.color || "#000000"}
+                                                                    onChange={(e) => {
+                                                                        const current = mergedOptions.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
+                                                                        const newStops = [...(current.colorStops || [])];
+                                                                        newStops[0] = { offset: 0, color: e.target.value };
+                                                                        updateCustomOption('dotsOptions', 'gradient', { ...current, colorStops: newStops });
+                                                                    }}
+                                                                    className="font-mono text-xs"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="text-xs font-medium">End Color</Label>
+                                                            <div className="flex gap-2">
+                                                                <Input
+                                                                    type="color"
+                                                                    className="w-12 h-9 p-1 cursor-pointer"
+                                                                    value={mergedOptions.dotsOptions?.gradient?.colorStops?.[1]?.color || "#000000"}
+                                                                    onChange={(e) => {
+                                                                        const current = mergedOptions.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
+                                                                        const newStops = [...(current.colorStops || [])];
+                                                                        if (!newStops[1]) newStops[1] = { offset: 1, color: e.target.value };
+                                                                        else newStops[1] = { ...newStops[1], color: e.target.value };
+                                                                        updateCustomOption('dotsOptions', 'gradient', { ...current, colorStops: newStops });
+                                                                    }}
+                                                                />
+                                                                <Input
+                                                                    value={mergedOptions.dotsOptions?.gradient?.colorStops?.[1]?.color || "#000000"}
+                                                                    onChange={(e) => {
+                                                                        const current = mergedOptions.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
+                                                                        const newStops = [...(current.colorStops || [])];
+                                                                        if (!newStops[1]) newStops[1] = { offset: 1, color: e.target.value };
+                                                                        else newStops[1] = { ...newStops[1], color: e.target.value };
+                                                                        updateCustomOption('dotsOptions', 'gradient', { ...current, colorStops: newStops });
+                                                                    }}
+                                                                    className="font-mono text-xs"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs font-medium">Rotation: {Math.round((mergedOptions.dotsOptions?.gradient?.rotation || 0) * 180 / Math.PI)}°</Label>
+                                                        <Slider
+                                                            min={0} max={360} step={15}
+                                                            value={[Math.round((mergedOptions.dotsOptions?.gradient?.rotation || 0) * 180 / Math.PI)]}
+                                                            onValueChange={(vals) => {
+                                                                const current = mergedOptions.dotsOptions?.gradient || { type: "linear", colorStops: [] };
+                                                                updateCustomOption('dotsOptions', 'gradient', { ...current, rotation: vals[0] * (Math.PI / 180) });
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </TabsContent>
+                                            </Tabs>
                                         </div>
                                     </div>
-                                </div>
+                                </CustomAccordionItem>
+
+                                {/* 3. Corners */}
+                                <CustomAccordionItem title="Corners" icon={<Shapes className="w-4 h-4" />}>
+                                    <div className="space-y-4 pt-2">
+                                        {/* Corner Square */}
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-medium">Corner Border Style</Label>
+                                            <div className="grid grid-cols-4 gap-3">
+                                                <StyleButton
+                                                    icon={<CornerSquareIcon />}
+                                                    label="square"
+                                                    isActive={mergedOptions.cornersSquareOptions?.type === "square"}
+                                                    onClick={() => updateCustomOption('cornersSquareOptions', 'type', 'square')}
+                                                />
+                                                <StyleButton
+                                                    icon={<CornerDotIcon />}
+                                                    label="dot"
+                                                    isActive={mergedOptions.cornersSquareOptions?.type === "dot"}
+                                                    onClick={() => updateCustomOption('cornersSquareOptions', 'type', 'dot')}
+                                                />
+                                                <StyleButton
+                                                    icon={<CornerExtraRoundedIcon />}
+                                                    label="extra rounded"
+                                                    isActive={mergedOptions.cornersSquareOptions?.type === "extra-rounded"}
+                                                    onClick={() => updateCustomOption('cornersSquareOptions', 'type', 'extra-rounded')}
+                                                />
+                                                <StyleButton
+                                                    icon={<CornerNoneIcon />}
+                                                    label="none"
+                                                    isActive={!mergedOptions.cornersSquareOptions?.type}
+                                                    onClick={() => updateCustomOption('cornersSquareOptions', 'type', undefined)}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-sm">Border Color</Label>
+                                            <div className="flex gap-2">
+                                                <Input type="color" className="w-12 h-9 p-1" value={mergedOptions.cornersSquareOptions?.color || "#000000"} onChange={(e) => updateCustomOption('cornersSquareOptions', 'color', e.target.value)} />
+                                                <Input value={mergedOptions.cornersSquareOptions?.color || "#000000"} onChange={(e) => updateCustomOption('cornersSquareOptions', 'color', e.target.value)} />
+                                            </div>
+                                        </div>
+
+                                        {/* Corner Dot */}
+                                        <div className="space-y-3 pt-4 border-t">
+                                            <Label className="text-sm font-medium">Corner Center Style</Label>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <StyleButton
+                                                    icon={<CornerCenterSquareIcon />}
+                                                    label="square"
+                                                    isActive={mergedOptions.cornersDotOptions?.type === "square"}
+                                                    onClick={() => updateCustomOption('cornersDotOptions', 'type', 'square')}
+                                                />
+                                                <StyleButton
+                                                    icon={<CornerCenterDotIcon />}
+                                                    label="dot"
+                                                    isActive={mergedOptions.cornersDotOptions?.type === "dot"}
+                                                    onClick={() => updateCustomOption('cornersDotOptions', 'type', 'dot')}
+                                                />
+                                                <StyleButton
+                                                    icon={<CornerNoneIcon />}
+                                                    label="none"
+                                                    isActive={!mergedOptions.cornersDotOptions?.type}
+                                                    onClick={() => updateCustomOption('cornersDotOptions', 'type', undefined)}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-sm">Center Color</Label>
+                                            <div className="flex gap-2">
+                                                <Input type="color" className="w-12 h-9 p-1" value={mergedOptions.cornersDotOptions?.color || "#000000"} onChange={(e) => updateCustomOption('cornersDotOptions', 'color', e.target.value)} />
+                                                <Input value={mergedOptions.cornersDotOptions?.color || "#000000"} onChange={(e) => updateCustomOption('cornersDotOptions', 'color', e.target.value)} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CustomAccordionItem>
+
+                                {/* 4. Background */}
+                                <CustomAccordionItem title="Background" icon={<Palette className="w-4 h-4" />}>
+                                    <div className="space-y-4 pt-2">
+                                        <Tabs defaultValue={mergedOptions.backgroundOptions?.gradient ? "gradient" : "solid"} onValueChange={(v) => {
+                                            if (v === "solid") {
+                                                updateCustomOption('backgroundOptions', 'gradient', undefined);
+                                                updateCustomOption('backgroundOptions', 'color', "#ffffff");
+                                            } else {
+                                                updateCustomOption('backgroundOptions', 'color', undefined);
+                                                updateCustomOption('backgroundOptions', 'gradient', {
+                                                    type: "linear",
+                                                    rotation: 0,
+                                                    colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }]
+                                                });
+                                            }
+                                        }}>
+                                            <TabsList className="grid w-full grid-cols-2">
+                                                <TabsTrigger value="solid">Solid</TabsTrigger>
+                                                <TabsTrigger value="gradient">Gradient</TabsTrigger>
+                                            </TabsList>
+                                            <TabsContent value="solid" className="mt-2">
+                                                <div className="flex gap-2">
+                                                    <Input type="color" className="w-12 h-9 p-1" value={mergedOptions.backgroundOptions?.color || "#ffffff"} onChange={(e) => updateCustomOption('backgroundOptions', 'color', e.target.value)} />
+                                                    <Input value={mergedOptions.backgroundOptions?.color || "#ffffff"} onChange={(e) => updateCustomOption('backgroundOptions', 'color', e.target.value)} />
+                                                </div>
+                                            </TabsContent>
+                                            <TabsContent value="gradient" className="mt-2 space-y-3">
+                                                <div className="flex gap-2">
+                                                    <Button size="sm" variant={mergedOptions.backgroundOptions?.gradient?.type === "linear" ? "default" : "outline"} onClick={() => {
+                                                        const current = mergedOptions.backgroundOptions?.gradient || { colorStops: [], rotation: 0 };
+                                                        updateCustomOption('backgroundOptions', 'gradient', { ...current, type: "linear" });
+                                                    }}>Linear</Button>
+                                                    <Button size="sm" variant={mergedOptions.backgroundOptions?.gradient?.type === "radial" ? "default" : "outline"} onClick={() => {
+                                                        const current = mergedOptions.backgroundOptions?.gradient || { colorStops: [], rotation: 0 };
+                                                        updateCustomOption('backgroundOptions', 'gradient', { ...current, type: "radial" });
+                                                    }}>Radial</Button>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div className="space-y-1">
+                                                        <Label className="text-xs">Start</Label>
+                                                        <Input type="color" className="w-full h-8 p-1" value={mergedOptions.backgroundOptions?.gradient?.colorStops?.[0]?.color || "#ffffff"} onChange={(e) => {
+                                                            const current = mergedOptions.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
+                                                            const newStops = [...(current.colorStops || [])];
+                                                            newStops[0] = { offset: 0, color: e.target.value };
+                                                            updateCustomOption('backgroundOptions', 'gradient', { ...current, colorStops: newStops });
+                                                        }} />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <Label className="text-xs">End</Label>
+                                                        <Input type="color" className="w-full h-8 p-1" value={mergedOptions.backgroundOptions?.gradient?.colorStops?.[1]?.color || "#ffffff"} onChange={(e) => {
+                                                            const current = mergedOptions.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
+                                                            const newStops = [...(current.colorStops || [])];
+                                                            if (!newStops[1]) newStops[1] = { offset: 1, color: e.target.value };
+                                                            else newStops[1] = { ...newStops[1], color: e.target.value };
+                                                            updateCustomOption('backgroundOptions', 'gradient', { ...current, colorStops: newStops });
+                                                        }} />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <Label className="text-xs">Rotation ({Math.round((mergedOptions.backgroundOptions?.gradient?.rotation || 0) * 180 / Math.PI)}°)</Label>
+                                                    <Slider
+                                                        min={0} max={360} step={15}
+                                                        value={[Math.round((mergedOptions.backgroundOptions?.gradient?.rotation || 0) * 180 / Math.PI)]}
+                                                        onValueChange={(vals) => {
+                                                            const current = mergedOptions.backgroundOptions?.gradient || { type: "linear", colorStops: [] };
+                                                            updateCustomOption('backgroundOptions', 'gradient', { ...current, rotation: vals[0] * (Math.PI / 180) });
+                                                        }}
+                                                    />
+                                                </div>
+                                            </TabsContent>
+                                        </Tabs>
+                                    </div>
+                                </CustomAccordionItem>
 
                                 {/* 3. Logo/Image */}
-                                <div className="space-y-4">
-                                    <h3 className="text-sm font-semibold flex items-center gap-2"><ImageIcon className="w-4 h-4" /> Logo</h3>
-                                    <div className="space-y-3">
-                                        <Label>Upload Logo</Label>
-                                        <Input type="file" accept="image/*" onChange={handleImageUpload} />
-                                        <div className="space-y-2">
-                                            <Label>Logo Margin</Label>
-                                            <Slider defaultValue={[0]} max={20} step={1} onValueChange={(vals) => updateCustomOption('imageOptions', 'margin', vals[0])} />
+                                <CustomAccordionItem title="Logo" icon={<ImageIcon className="w-4 h-4" />}>
+                                    <div className="space-y-4 pt-2">
+                                        <div className="space-y-3">
+                                            <Label>Upload Logo</Label>
+                                            <Input type="file" accept="image/*" onChange={handleImageUpload} />
+                                            <div className="space-y-2">
+                                                <Label>Logo Margin</Label>
+                                                <Slider defaultValue={[0]} max={20} step={1} onValueChange={(vals) => updateCustomOption('imageOptions', 'margin', vals[0])} />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </CustomAccordionItem>
 
                                 <Button onClick={handleFinalSave} className="w-full mt-6" size="lg" disabled={isSaving}>
                                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
