@@ -1,7 +1,10 @@
+import type { Options as QRCodeStylingConfig } from "qr-code-styling"
 declare global {
     type QrRedirectType = "url" | "social" | "app" | "payment" | "location"
     type QrPageType = "couponPage" | "businessCard" | "menuCard" | "eventPage" | "marketingPage" | "textPage"
     type QRType = QrPageType | QrRedirectType
+
+    type DynamicPageData = CouponData | BusinessCardData | MenuData | EventPageData | MarketingData | TextPageData | SocialData | AppData | PaymentData
 
     interface CouponData {
         title: string;
@@ -82,18 +85,18 @@ declare global {
 
 
 
-    export interface SocialData {
+    interface SocialData {
         platforms: { platform: string; url: string; }[];
         autoRedirect?: boolean; // If true, tries to detect user agent or just shows a list
     }
 
-    export interface AppData {
+    interface AppData {
         iosUrl?: string;
         androidUrl?: string;
         fallbackUrl: string;
     }
 
-    export interface PaymentData {
+    interface PaymentData {
         recipientName: string;
         amount?: string;
         currency?: string;
@@ -104,17 +107,12 @@ declare global {
     }
 
 
+    interface QRCodeStyle { template: string; style: Partial<QRCodeStylingConfig>; frame?: unknown }
 
-    type DynamicPageData =
-        | CouponData
-        | BusinessCardData
-        | MenuData
-        | EventPageData
-        | MarketingData
-        | TextPageData
-        | SocialData
-        | AppData
-        | PaymentData
+
+
+
+
 
 }
 
