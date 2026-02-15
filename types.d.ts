@@ -105,9 +105,17 @@ declare global {
         // Stripe link or other payment links
         customLink?: string;
     }
+    // Exclude: type, width, height, data, nodeCanvas, jsdom, qrOptions
+    type QRStyleOptions = Omit<
+        QRCodeStylingConfig,
+        "type" | "width" | "height" | "data" | "nodeCanvas" | "jsdom" | "qrOptions"
+    >;
 
-
-    interface QRCodeStyle { template: string; style: Partial<QRCodeStylingConfig>; frame?: unknown }
+    interface QRCodeStyle {
+        template: string;
+        style: QRStyleOptions;
+        frame?: unknown
+    }
 
 
 

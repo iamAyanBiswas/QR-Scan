@@ -49,7 +49,7 @@ export default function QRCodeGenerator() {
     const [expiresAt, setExpiresAt] = useState("");
     const [type, setType] = useState<QRType>("url");
     const [data, setData] = useState<any>({});
-    const [qrCodeStyle, setQrCodeStyle] = useState<QRCodeStyle>({ template: "classic-black", style: {} });
+    const [qrCodeStyle, setQrCodeStyle] = useState<QRCodeStyle>({ template: "general-minimal", style: {} });
 
     // Dynamic QR State
     const [isSaving, setIsSaving] = useState(false);
@@ -80,12 +80,10 @@ export default function QRCodeGenerator() {
         // Ensure Instance Exists
         if (!qrCodeRef.current) {
             qrCodeRef.current = new QRCodeStyling({
-                shape: 'circle',
                 width: 300,
                 height: 300,
-                image: "",
-                dotsOptions: { color: "#000000", type: "rounded" },
-                imageOptions: { crossOrigin: "anonymous", margin: 20 },
+                // dotsOptions: { color: "#000000", type: "rounded" },
+                // imageOptions: { crossOrigin: "anonymous", margin: 20 },
             });
         }
 
@@ -104,7 +102,7 @@ export default function QRCodeGenerator() {
             ...qrCodeStyle.style,
         };
 
-        console.log("updateeeee", qrCodeStyle)
+        console.log("update...", qrCodeStyle)
 
         qrCodeRef.current.update(finalOptions);
     }, [shortUrl, qrCodeStyle, qrContainer]); // Added qrContainer to ensure update runs after mount if needed
@@ -529,7 +527,7 @@ export default function QRCodeGenerator() {
                                 /* STEP 2: DESIGN/CUSTOMIZE */
                                 <div className="space-y-6">
                                     <QRStylingConfig
-                                        value={qrCodeStyle}
+                                        qrConfig={qrCodeStyle}
                                         onChange={setQrCodeStyle}
                                         onImageUpload={handleImageUpload}
                                     />
