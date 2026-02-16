@@ -54,11 +54,11 @@ export default function QRCodeGenerator() {
 
     // Dynamic QR State
     const [isSaving, setIsSaving] = useState(false);
-    const [shortUrl, setShortUrl] = useState<string | null>("http://localhost:3000/scan/abcdef");
+    const [shortUrl, setShortUrl] = useState<string | null>(null);
 
 
 
-    const [step, setStep] = useState<1 | 2>(2);
+    const [step, setStep] = useState<1 | 2>(1);
     const [shortId, setShortId] = useState<string | null>(null);
 
 
@@ -528,7 +528,7 @@ export default function QRCodeGenerator() {
 
 
                         {step === 1 ?
-                            (<Card className="border-none shadow-none py-0">
+                            (<Card className="border-none shadow-none py-0 bg-transparent">
                                 <CardContent>
 
                                     {/* Live preview for Pages */}
