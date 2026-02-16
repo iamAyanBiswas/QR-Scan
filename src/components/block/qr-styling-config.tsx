@@ -189,9 +189,9 @@ export function QRStylingConfig() {
                                 <TabsTrigger value="solid">Solid</TabsTrigger>
                                 <TabsTrigger value="gradient">Gradient</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="solid" className="mt-3">
-                                <div className="flex gap-3">
-                                    <Input type="color" className="w-14 h-10 p-1 cursor-pointer" value={qrCodeStyle.style.dotsOptions?.color || "#000000"} onChange={(e) => setDotsColor(e.target.value)} />
+                            <TabsContent value="solid" className="mt-2">
+                                <div className="flex gap-2">
+                                    <Input type="color" className="w-12 h-9 p-1 cursor-pointer" value={qrCodeStyle.style.dotsOptions?.color || "#000000"} onChange={(e) => setDotsColor(e.target.value)} />
                                     <Input value={qrCodeStyle.style.dotsOptions?.color || "#000000"} onChange={(e) => setDotsColor(e.target.value)} className="font-mono" />
                                 </div>
                             </TabsContent>
@@ -264,9 +264,10 @@ export function QRStylingConfig() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2 pb-2">
                                     <Label className="text-xs font-medium">Rotation: {Math.round((qrCodeStyle.style.dotsOptions?.gradient?.rotation || 0) * 180 / Math.PI)}°</Label>
                                     <Slider
+                                        className="p-1"
                                         min={0} max={360} step={15}
                                         value={[Math.round((qrCodeStyle.style.dotsOptions?.gradient?.rotation || 0) * 180 / Math.PI)]}
                                         onValueChange={(vals) => {
@@ -378,11 +379,11 @@ export function QRStylingConfig() {
                         </TabsList>
                         <TabsContent value="solid" className="mt-2">
                             <div className="flex gap-2">
-                                <Input type="color" className="w-12 h-9 p-1" value={qrCodeStyle.style.backgroundOptions?.color || "#ffffff"} onChange={(e) => setBackgroundColor(e.target.value)} />
+                                <Input type="color" className="w-12 h-9 p-1 cursor-pointer" value={qrCodeStyle.style.backgroundOptions?.color || "#ffffff"} onChange={(e) => setBackgroundColor(e.target.value)} />
                                 <Input value={qrCodeStyle.style.backgroundOptions?.color || "#ffffff"} onChange={(e) => setBackgroundColor(e.target.value)} />
                             </div>
                         </TabsContent>
-                        <TabsContent value="gradient" className="mt-2 space-y-3">
+                        <TabsContent value="gradient" className="mt-3 space-y-4">
                             <div className="flex gap-2">
                                 <Button size="sm" variant={qrCodeStyle.style.backgroundOptions?.gradient?.type === "linear" ? "default" : "outline"} onClick={() => {
                                     const current = qrCodeStyle.style.backgroundOptions?.gradient || { colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }], rotation: 0 };
@@ -393,31 +394,65 @@ export function QRStylingConfig() {
                                     setBackgroundGradient({ ...current, type: "radial" });
                                 }}>Radial</Button>
                             </div>
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Start</Label>
-                                    <Input type="color" className="w-full h-8 p-1" value={qrCodeStyle.style.backgroundOptions?.gradient?.colorStops?.[0]?.color || "#ffffff"} onChange={(e) => {
-                                        const current = qrCodeStyle.style.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
-                                        const newStops = [...(current.colorStops || [])];
-                                        if (!newStops[0]) newStops[0] = { offset: 0, color: e.target.value };
-                                        else newStops[0] = { ...newStops[0], color: e.target.value };
-                                        setBackgroundGradient({ ...current, colorStops: newStops });
-                                    }} />
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-medium">Start Color</Label>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            type="color"
+                                            className="w-12 h-9 p-1 cursor-pointer"
+                                            value={qrCodeStyle.style.backgroundOptions?.gradient?.colorStops?.[0]?.color || "#ffffff"} onChange={(e) => {
+                                                const current = qrCodeStyle.style.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
+                                                const newStops = [...(current.colorStops || [])];
+                                                if (!newStops[0]) newStops[0] = { offset: 0, color: e.target.value };
+                                                else newStops[0] = { ...newStops[0], color: e.target.value };
+                                                setBackgroundGradient({ ...current, colorStops: newStops });
+                                            }}
+
+                                        />
+                                        <Input
+                                            value={qrCodeStyle.style.backgroundOptions?.gradient?.colorStops?.[0]?.color || "#ffffff"} onChange={(e) => {
+                                                const current = qrCodeStyle.style.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
+                                                const newStops = [...(current.colorStops || [])];
+                                                if (!newStops[0]) newStops[0] = { offset: 0, color: e.target.value };
+                                                else newStops[0] = { ...newStops[0], color: e.target.value };
+                                                setBackgroundGradient({ ...current, colorStops: newStops });
+                                            }}
+                                            className="font-mono text-xs"
+                                        />
+                                    </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs">End</Label>
-                                    <Input type="color" className="w-full h-8 p-1" value={qrCodeStyle.style.backgroundOptions?.gradient?.colorStops?.[1]?.color || "#ffffff"} onChange={(e) => {
-                                        const current = qrCodeStyle.style.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
-                                        const newStops = [...(current.colorStops || [])];
-                                        if (!newStops[1]) newStops[1] = { offset: 1, color: e.target.value };
-                                        else newStops[1] = { ...newStops[1], color: e.target.value };
-                                        setBackgroundGradient({ ...current, colorStops: newStops });
-                                    }} />
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-medium">End Color</Label>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            type="color"
+                                            className="w-12 h-9 p-1 cursor-pointer"
+                                            value={qrCodeStyle.style.backgroundOptions?.gradient?.colorStops?.[1]?.color || "#ffffff"} onChange={(e) => {
+                                                const current = qrCodeStyle.style.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
+                                                const newStops = [...(current.colorStops || [])];
+                                                if (!newStops[1]) newStops[1] = { offset: 1, color: e.target.value };
+                                                else newStops[1] = { ...newStops[1], color: e.target.value };
+                                                setBackgroundGradient({ ...current, colorStops: newStops });
+                                            }} />
+
+                                        <Input
+                                            value={qrCodeStyle.style.backgroundOptions?.gradient?.colorStops?.[1]?.color || "#ffffff"} onChange={(e) => {
+                                                const current = qrCodeStyle.style.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
+                                                const newStops = [...(current.colorStops || [])];
+                                                if (!newStops[1]) newStops[1] = { offset: 1, color: e.target.value };
+                                                else newStops[1] = { ...newStops[1], color: e.target.value };
+                                                setBackgroundGradient({ ...current, colorStops: newStops });
+                                            }}
+                                            className="font-mono text-xs"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                            <div className="space-y-1">
+                            <div className="space-y-2 pb-2">
                                 <Label className="text-xs">Rotation ({Math.round((qrCodeStyle.style.backgroundOptions?.gradient?.rotation || 0) * 180 / Math.PI)}°)</Label>
                                 <Slider
+                                    className="p-1"
                                     min={0} max={360} step={15}
                                     value={[Math.round((qrCodeStyle.style.backgroundOptions?.gradient?.rotation || 0) * 180 / Math.PI)]}
                                     onValueChange={(vals) => {
