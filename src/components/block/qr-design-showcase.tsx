@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import QRCodeStyling from "qr-code-styling";
 import { QR_CATEGORIES, QRStyle } from "@/lib/qr-styles";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 
 const QRPreview = ({ style }: { style: QRStyle }) => {
     const ref = useRef<HTMLDivElement>(null);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ function CustomAccordionItem({ title, icon, children }: CustomAccordionItemProps
 }
 
 export function QRStylingConfig() {
+    const inputRef = useRef<HTMLInputElement>(null)
     const {
         qrCodeStyle,
         updateTemplate,
@@ -67,7 +68,6 @@ export function QRStylingConfig() {
             const reader = new FileReader();
             reader.onload = () => {
                 setImageHideBackgroundDots(true);
-                setPublicImage(true);
                 setImage(reader.result as string);
             };
             reader.readAsDataURL(file);
@@ -75,6 +75,15 @@ export function QRStylingConfig() {
             setLogoFile(null);
         }
     };
+    const handleClearImage = () => {
+        setLogoFile(null)
+        setImage("")
+
+        if (inputRef.current) {
+            inputRef.current.value = ""
+        }
+    }
+
 
     return (
         <div className="space-y-6">
@@ -93,7 +102,7 @@ export function QRStylingConfig() {
                                 {cat.styles.map((style) => (
                                     <button
                                         key={style.name}
-                                        onClick={() => updateTemplate(style.name)}
+                                        onClick={() => { updateTemplate(style.name); handleClearImage() }}
                                         className={cn(
                                             "flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all hover:bg-accent",
                                             qrCodeStyle.template === style.name ? "border-primary bg-accent" : "border-transparent bg-background"
@@ -427,7 +436,7 @@ export function QRStylingConfig() {
                 <div className="space-y-4 pt-2">
                     <div className="space-y-3">
                         <Label>Upload Logo</Label>
-                        <Input type="file" accept="image/*" onChange={handleLogoUpload} />
+                        <Input type="file" accept="image/*" ref={inputRef} onChange={handleLogoUpload} />
                         <div className="space-y-2">
                             <Label>Logo Margin</Label>
                             <Slider defaultValue={[0]} max={20} step={1} onValueChange={(vals) => setImageMargin(vals[0])} />

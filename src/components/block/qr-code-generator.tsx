@@ -54,7 +54,7 @@ export default function QRCodeGenerator() {
 
     // Dynamic QR State
     const [isSaving, setIsSaving] = useState(false);
-    const [shortUrl, setShortUrl] = useState<string | null>("null");
+    const [shortUrl, setShortUrl] = useState<string | null>("http://localhost:3000/scan/abcdef");
 
 
 
@@ -82,8 +82,6 @@ export default function QRCodeGenerator() {
             qrCodeRef.current = new QRCodeStyling({
                 width: 300,
                 height: 300,
-                // dotsOptions: { color: "#000000", type: "rounded" },
-                // imageOptions: { crossOrigin: "anonymous", margin: 20 },
             });
         }
 
@@ -102,7 +100,7 @@ export default function QRCodeGenerator() {
             ...qrCodeStyle.style,
         };
 
-        console.log("update...", qrCodeStyle)
+        console.log("update...", finalOptions)
 
         qrCodeRef.current.update(finalOptions);
     }, [shortUrl, qrCodeStyle, qrContainer]); // Added qrContainer to ensure update runs after mount if needed

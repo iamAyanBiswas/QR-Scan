@@ -1,7 +1,3 @@
-import { Options, CornerDotType, CornerSquareType, DotType } from "qr-code-styling";
-
-
-
 export type QRStyle = {
     name: string;
     label: string;
@@ -42,32 +38,14 @@ const defaults: QRStyleOptions = {
     margin: 0,
     image: undefined,
     imageOptions: {
-        'hideBackgroundDots': undefined,
-        'crossOrigin': undefined,
-        'imageSize': undefined,
-        'margin': undefined,
-        'saveAsBlob': undefined
     },
     dotsOptions: {
-        'color': undefined,
-        'gradient': undefined,
-        'roundSize': undefined,
-        'type': undefined
     },
     cornersDotOptions: {
-        'color': undefined,
-        'gradient': undefined,
-        'type': undefined
     },
     cornersSquareOptions: {
-        'color': undefined,
-        'gradient': undefined,
-        'type': undefined
     },
     backgroundOptions: {
-        'color': undefined,
-        'gradient': undefined,
-        'round': undefined
     }
 };
 
@@ -82,7 +60,7 @@ const GENERAL_STYLES: QRStyle[] = [
         options: {
             ...defaults,
             shape: "square",
-            margin: 0,
+            margin: 10,
             image: undefined,
             dotsOptions: { type: "rounded", color: "#1e293b", gradient: undefined }, // Slate-800
             backgroundOptions: { color: "#ffffff", gradient: undefined },
