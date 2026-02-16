@@ -5,6 +5,7 @@ import { Options, CornerDotType, CornerSquareType, DotType } from "qr-code-styli
 export type QRStyle = {
     name: string;
     label: string;
+    publicImage: boolean
     description?: string;
     options: QRStyleOptions;
 };
@@ -77,6 +78,7 @@ const GENERAL_STYLES: QRStyle[] = [
     {
         name: "general-minimal",
         label: "Minimalist",
+        publicImage: false,
         options: {
             ...defaults,
             shape: "square",
@@ -91,6 +93,7 @@ const GENERAL_STYLES: QRStyle[] = [
     {
         name: "general-elegant",
         label: "Gold Elegance",
+        publicImage: false,
         options: {
             ...defaults,
             shape: "square",
@@ -109,6 +112,7 @@ const GENERAL_STYLES: QRStyle[] = [
     {
         name: "general-soft",
         label: "Soft Pastel",
+        publicImage: false,
         options: {
             ...defaults,
             dotsOptions: {
@@ -124,6 +128,7 @@ const GENERAL_STYLES: QRStyle[] = [
     {
         name: "general-neon",
         label: "Cyber Neon",
+        publicImage: false,
         options: {
             ...defaults,
             dotsOptions: { type: "square", color: "#00ff9d", gradient: undefined },
@@ -135,6 +140,7 @@ const GENERAL_STYLES: QRStyle[] = [
     {
         name: "general-corporate",
         label: "Corporate Tech",
+        publicImage: false,
         options: {
             ...defaults,
             dotsOptions: { type: "dots", color: "#0f172a", gradient: undefined }, // Dark Blue
@@ -146,6 +152,7 @@ const GENERAL_STYLES: QRStyle[] = [
     {
         name: "general-crimson",
         label: "Bold Crimson",
+        publicImage: false,
         options: {
             ...defaults,
             dotsOptions: {
@@ -167,6 +174,7 @@ const SOCIAL_STYLES: QRStyle[] = [
     {
         name: "social-instagram",
         label: "Instagram Vibe",
+        publicImage: false,
         options: {
             ...defaults,
             dotsOptions: {
@@ -182,6 +190,7 @@ const SOCIAL_STYLES: QRStyle[] = [
     {
         name: "social-whatsapp",
         label: "WhatsApp Vibe",
+        publicImage: false,
         options: {
             ...defaults,
             dotsOptions: { type: "dots", color: "#25D366", gradient: undefined },
@@ -193,6 +202,7 @@ const SOCIAL_STYLES: QRStyle[] = [
     {
         name: "social-telegram",
         label: "Telegram Vibe",
+        publicImage: false,
         options: {
             ...defaults,
             dotsOptions: { type: "classy", color: "#229ED9", gradient: undefined },
@@ -204,6 +214,7 @@ const SOCIAL_STYLES: QRStyle[] = [
     {
         name: "social-facebook",
         label: "Facebook Vibe",
+        publicImage: false,
         options: {
             ...defaults,
             dotsOptions: { type: "rounded", color: "#1877F2", gradient: undefined },
@@ -215,6 +226,7 @@ const SOCIAL_STYLES: QRStyle[] = [
     {
         name: "social-twitter",
         label: "X / Twitter",
+        publicImage: false,
         options: {
             ...defaults,
             dotsOptions: { type: "square", color: "#000000", gradient: undefined },
@@ -226,6 +238,7 @@ const SOCIAL_STYLES: QRStyle[] = [
     {
         name: "social-youtube",
         label: "YouTube Vibe",
+        publicImage: false,
         options: {
             ...defaults,
             dotsOptions: { type: "classy-rounded", color: "#FF0000", gradient: undefined },

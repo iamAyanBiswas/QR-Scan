@@ -1,17 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { Options } from "qr-code-styling";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { LayoutGrid, Shapes, Palette, Image as ImageIcon, LayoutTemplate, ChevronDown, ChevronRight } from "lucide-react";
-import { ALL_STYLES as PREMIUM_STYLES, QR_CATEGORIES } from "@/lib/qr-styles";
+import { QR_CATEGORIES } from "@/lib/qr-styles";
 import { cn } from "@/lib/utils";
 import { StyleButton } from "@/components/custom/style-button";
 import { DotsSquareIcon, DotsRoundIcon, DotsRoundedIcon, DotsExtraRoundedIcon, DotsClassyIcon, DotsClassyRoundedIcon, CornerSquareIcon, CornerDotIcon, CornerExtraRoundedIcon, CornerNoneIcon, CornerCenterSquareIcon, CornerCenterDotIcon } from "@/components/custom/qr-style-icons";
+import { useQrStyleStore } from "@/store/qr-style-store";
 
 
 interface CustomAccordionItemProps {
@@ -39,53 +39,42 @@ function CustomAccordionItem({ title, icon, children }: CustomAccordionItemProps
     );
 }
 
-interface QRStylingConfigProps {
-    qrConfig: QRCodeStyle;
-    onChange: (qrConfig: QRCodeStyle) => void;
-    onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
+export function QRStylingConfig() {
+    const {
+        qrCodeStyle,
+        updateTemplate,
+        setDotsType,
+        setDotsColor,
+        setDotsGradient,
+        setCornersSquareType,
+        setCornersSquareColor,
+        setCornersDotType,
+        setCornersDotColor,
+        setBackgroundColor,
+        setBackgroundGradient,
+        setImage,
+        setImageHideBackgroundDots,
+        setImageMargin,
+        setPublicImage,
+        setLogoFile,
+        setQrCodeStyle,
+    } = useQrStyleStore();
 
-export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStylingConfigProps) {
-    const [internalStyle, setInternalStyle] = useState<QRCodeStyle>()
-
-    // Helper functions to update the QRCodeStyle object
-    const updateTemplate = (template: string) => {
-        const templateOptions = PREMIUM_STYLES.find(s => s.name === template)?.options || {};
-        onChange({ template, style: templateOptions })
+    const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setLogoFile(file);
+            const reader = new FileReader();
+            reader.onload = () => {
+                setImageHideBackgroundDots(true);
+                setPublicImage(true);
+                setImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setLogoFile(null);
+        }
     };
-
-    const updateStyleOption = <C extends keyof QRStyleOptions, K extends keyof NonNullable<QRStyleOptions[C]>>(
-        category: C,
-        key: K,
-        optionValue: NonNullable<QRStyleOptions[C]>[K]
-    ) => {
-        onChange({
-            ...qrConfig,
-            style: {
-                ...qrConfig.style,
-                [category]: {
-                    ...(qrConfig.style[category] as unknown as object || {}),
-                    [key]: optionValue
-                }
-            } as QRStyleOptions
-        });
-    };
-
-
-    // Merged options for display
-    // const mergedOptions = React.useMemo(() => {
-    //     const templateOptions = PREMIUM_STYLES.find(s => s.name === qrConfig.template)?.options || {};
-    //     const customStyle = qrConfig.style || {};
-    //     return {
-    //         ...templateOptions,
-    //         ...customStyle,
-    //         dotsOptions: { ...templateOptions.dotsOptions, ...customStyle.dotsOptions },
-    //         cornersSquareOptions: { ...templateOptions.cornersSquareOptions, ...customStyle.cornersSquareOptions },
-    //         cornersDotOptions: { ...templateOptions.cornersDotOptions, ...customStyle.cornersDotOptions },
-    //         backgroundOptions: { ...templateOptions.backgroundOptions, ...customStyle.backgroundOptions },
-    //         imageOptions: { ...templateOptions.imageOptions, ...customStyle.imageOptions },
-    //     };
-    // }, [qrConfig]);
 
     return (
         <div className="space-y-6">
@@ -107,7 +96,7 @@ export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStyling
                                         onClick={() => updateTemplate(style.name)}
                                         className={cn(
                                             "flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all hover:bg-accent",
-                                            qrConfig.template === style.name ? "border-primary bg-accent" : "border-transparent bg-background"
+                                            qrCodeStyle.template === style.name ? "border-primary bg-accent" : "border-transparent bg-background"
                                         )}
                                     >
                                         <div className="w-8 h-8 rounded mb-2 bg-linear-to-br from-gray-100 to-gray-300 dark:from-gray-800 dark:to-gray-900 border flex items-center justify-center">
@@ -136,55 +125,54 @@ export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStyling
                             <StyleButton
                                 icon={<DotsSquareIcon />}
                                 label="square"
-                                isActive={qrConfig.style.dotsOptions?.type === "square"}
-                                onClick={() => updateStyleOption('dotsOptions', 'type', 'square')}
+                                isActive={qrCodeStyle.style.dotsOptions?.type === "square"}
+                                onClick={() => setDotsType('square')}
                             />
                             <StyleButton
                                 icon={<DotsRoundIcon />}
                                 label="dots"
-                                isActive={qrConfig.style.dotsOptions?.type === "dots"}
-                                onClick={() => updateStyleOption('dotsOptions', 'type', 'dots')}
+                                isActive={qrCodeStyle.style.dotsOptions?.type === "dots"}
+                                onClick={() => setDotsType('dots')}
                             />
                             <StyleButton
                                 icon={<DotsRoundedIcon />}
                                 label="rounded"
-                                isActive={qrConfig.style.dotsOptions?.type === "rounded"}
-                                onClick={() => { updateStyleOption('dotsOptions', 'type', 'rounded'); }}
-
+                                isActive={qrCodeStyle.style.dotsOptions?.type === "rounded"}
+                                onClick={() => setDotsType('rounded')}
                             />
                             <StyleButton
                                 icon={<DotsExtraRoundedIcon />}
                                 label="extra rounded"
-                                isActive={qrConfig.style.dotsOptions?.type === "extra-rounded"}
-                                onClick={() => updateStyleOption('dotsOptions', 'type', 'extra-rounded')}
+                                isActive={qrCodeStyle.style.dotsOptions?.type === "extra-rounded"}
+                                onClick={() => setDotsType('extra-rounded')}
                             />
                             <StyleButton
                                 icon={<DotsClassyIcon />}
                                 label="classy"
-                                isActive={qrConfig.style.dotsOptions?.type === "classy"}
-                                onClick={() => updateStyleOption('dotsOptions', 'type', 'classy')}
+                                isActive={qrCodeStyle.style.dotsOptions?.type === "classy"}
+                                onClick={() => setDotsType('classy')}
                             />
                             <StyleButton
                                 icon={<DotsClassyRoundedIcon />}
                                 label="classy rounded"
-                                isActive={qrConfig.style.dotsOptions?.type === "classy-rounded"}
-                                onClick={() => updateStyleOption('dotsOptions', 'type', 'classy-rounded')}
+                                isActive={qrCodeStyle.style.dotsOptions?.type === "classy-rounded"}
+                                onClick={() => setDotsType('classy-rounded')}
                             />
                         </div>
                     </div>
 
                     <div className="space-y-3">
                         <Label className="text-sm font-medium">Color</Label>
-                        <Tabs value={qrConfig.style.dotsOptions?.gradient ? "gradient" : "solid"} onValueChange={(v) => {
+                        <Tabs value={qrCodeStyle.style.dotsOptions?.gradient ? "gradient" : "solid"} onValueChange={(v) => {
                             if (v === "solid") {
-                                updateStyleOption('dotsOptions', 'gradient', undefined);
-                                updateStyleOption('dotsOptions', 'color', qrConfig.style.dotsOptions?.gradient?.colorStops?.[0]?.color || "#000000");
+                                setDotsGradient(undefined);
+                                setDotsColor(qrCodeStyle.style.dotsOptions?.gradient?.colorStops?.[0]?.color || "#000000");
                             } else {
-                                updateStyleOption('dotsOptions', 'color', undefined);
-                                updateStyleOption('dotsOptions', 'gradient', {
+                                setDotsColor(undefined);
+                                setDotsGradient({
                                     type: "linear",
                                     rotation: 0,
-                                    colorStops: [{ offset: 0, color: qrConfig.style.dotsOptions?.color || "#000000" }, { offset: 1, color: qrConfig.style.dotsOptions?.color || "#000000" }]
+                                    colorStops: [{ offset: 0, color: qrCodeStyle.style.dotsOptions?.color || "#000000" }, { offset: 1, color: qrCodeStyle.style.dotsOptions?.color || "#000000" }]
                                 });
                             }
                         }}>
@@ -194,19 +182,19 @@ export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStyling
                             </TabsList>
                             <TabsContent value="solid" className="mt-3">
                                 <div className="flex gap-3">
-                                    <Input type="color" className="w-14 h-10 p-1 cursor-pointer" value={qrConfig.style.dotsOptions?.color || "#000000"} onChange={(e) => updateStyleOption('dotsOptions', 'color', e.target.value)} />
-                                    <Input value={qrConfig.style.dotsOptions?.color || "#000000"} onChange={(e) => updateStyleOption('dotsOptions', 'color', e.target.value)} className="font-mono" />
+                                    <Input type="color" className="w-14 h-10 p-1 cursor-pointer" value={qrCodeStyle.style.dotsOptions?.color || "#000000"} onChange={(e) => setDotsColor(e.target.value)} />
+                                    <Input value={qrCodeStyle.style.dotsOptions?.color || "#000000"} onChange={(e) => setDotsColor(e.target.value)} className="font-mono" />
                                 </div>
                             </TabsContent>
                             <TabsContent value="gradient" className="mt-3 space-y-4">
                                 <div className="flex gap-3">
-                                    <Button size="sm" variant={qrConfig.style.dotsOptions?.gradient?.type === "linear" ? "default" : "outline"} onClick={() => {
-                                        const current = qrConfig.style.dotsOptions?.gradient || { colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }], rotation: 0 };
-                                        updateStyleOption('dotsOptions', 'gradient', { ...current, type: "linear" });
+                                    <Button size="sm" variant={qrCodeStyle.style.dotsOptions?.gradient?.type === "linear" ? "default" : "outline"} onClick={() => {
+                                        const current = qrCodeStyle.style.dotsOptions?.gradient || { colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }], rotation: 0 };
+                                        setDotsGradient({ ...current, type: "linear" });
                                     }}>Linear</Button>
-                                    <Button size="sm" variant={qrConfig.style.dotsOptions?.gradient?.type === "radial" ? "default" : "outline"} onClick={() => {
-                                        const current = qrConfig.style.dotsOptions?.gradient || { colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }], rotation: 0 };
-                                        updateStyleOption('dotsOptions', 'gradient', { ...current, type: "radial" });
+                                    <Button size="sm" variant={qrCodeStyle.style.dotsOptions?.gradient?.type === "radial" ? "default" : "outline"} onClick={() => {
+                                        const current = qrCodeStyle.style.dotsOptions?.gradient || { colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }], rotation: 0 };
+                                        setDotsGradient({ ...current, type: "radial" });
                                     }}>Radial</Button>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
@@ -216,23 +204,23 @@ export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStyling
                                             <Input
                                                 type="color"
                                                 className="w-12 h-9 p-1 cursor-pointer"
-                                                value={qrConfig.style.dotsOptions?.gradient?.colorStops?.[0]?.color || "#000000"}
+                                                value={qrCodeStyle.style.dotsOptions?.gradient?.colorStops?.[0]?.color || "#000000"}
                                                 onChange={(e) => {
-                                                    const current = qrConfig.style.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
+                                                    const current = qrCodeStyle.style.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
                                                     const newStops = [...(current.colorStops || [])];
                                                     if (!newStops[0]) newStops[0] = { offset: 0, color: e.target.value };
                                                     else newStops[0] = { ...newStops[0], color: e.target.value };
-                                                    updateStyleOption('dotsOptions', 'gradient', { ...current, colorStops: newStops });
+                                                    setDotsGradient({ ...current, colorStops: newStops });
                                                 }}
                                             />
                                             <Input
-                                                value={qrConfig.style.dotsOptions?.gradient?.colorStops?.[0]?.color || "#000000"}
+                                                value={qrCodeStyle.style.dotsOptions?.gradient?.colorStops?.[0]?.color || "#000000"}
                                                 onChange={(e) => {
-                                                    const current = qrConfig.style.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
+                                                    const current = qrCodeStyle.style.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
                                                     const newStops = [...(current.colorStops || [])];
                                                     if (!newStops[0]) newStops[0] = { offset: 0, color: e.target.value };
                                                     else newStops[0] = { ...newStops[0], color: e.target.value };
-                                                    updateStyleOption('dotsOptions', 'gradient', { ...current, colorStops: newStops });
+                                                    setDotsGradient({ ...current, colorStops: newStops });
                                                 }}
                                                 className="font-mono text-xs"
                                             />
@@ -244,23 +232,23 @@ export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStyling
                                             <Input
                                                 type="color"
                                                 className="w-12 h-9 p-1 cursor-pointer"
-                                                value={qrConfig.style.dotsOptions?.gradient?.colorStops?.[1]?.color || "#000000"}
+                                                value={qrCodeStyle.style.dotsOptions?.gradient?.colorStops?.[1]?.color || "#000000"}
                                                 onChange={(e) => {
-                                                    const current = qrConfig.style.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
+                                                    const current = qrCodeStyle.style.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
                                                     const newStops = [...(current.colorStops || [])];
                                                     if (!newStops[1]) newStops[1] = { offset: 1, color: e.target.value };
                                                     else newStops[1] = { ...newStops[1], color: e.target.value };
-                                                    updateStyleOption('dotsOptions', 'gradient', { ...current, colorStops: newStops });
+                                                    setDotsGradient({ ...current, colorStops: newStops });
                                                 }}
                                             />
                                             <Input
-                                                value={qrConfig.style.dotsOptions?.gradient?.colorStops?.[1]?.color || "#000000"}
+                                                value={qrCodeStyle.style.dotsOptions?.gradient?.colorStops?.[1]?.color || "#000000"}
                                                 onChange={(e) => {
-                                                    const current = qrConfig.style.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
+                                                    const current = qrCodeStyle.style.dotsOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }] };
                                                     const newStops = [...(current.colorStops || [])];
                                                     if (!newStops[1]) newStops[1] = { offset: 1, color: e.target.value };
                                                     else newStops[1] = { ...newStops[1], color: e.target.value };
-                                                    updateStyleOption('dotsOptions', 'gradient', { ...current, colorStops: newStops });
+                                                    setDotsGradient({ ...current, colorStops: newStops });
                                                 }}
                                                 className="font-mono text-xs"
                                             />
@@ -268,13 +256,13 @@ export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStyling
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-medium">Rotation: {Math.round((qrConfig.style.dotsOptions?.gradient?.rotation || 0) * 180 / Math.PI)}°</Label>
+                                    <Label className="text-xs font-medium">Rotation: {Math.round((qrCodeStyle.style.dotsOptions?.gradient?.rotation || 0) * 180 / Math.PI)}°</Label>
                                     <Slider
                                         min={0} max={360} step={15}
-                                        value={[Math.round((qrConfig.style.dotsOptions?.gradient?.rotation || 0) * 180 / Math.PI)]}
+                                        value={[Math.round((qrCodeStyle.style.dotsOptions?.gradient?.rotation || 0) * 180 / Math.PI)]}
                                         onValueChange={(vals) => {
-                                            const current = qrConfig.style.dotsOptions?.gradient || { type: "linear", colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }], rotation: 0 };
-                                            updateStyleOption('dotsOptions', 'gradient', { ...current, rotation: vals[0] * (Math.PI / 180) });
+                                            const current = qrCodeStyle.style.dotsOptions?.gradient || { type: "linear", colorStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#000000" }], rotation: 0 };
+                                            setDotsGradient({ ...current, rotation: vals[0] * (Math.PI / 180) });
                                         }}
                                     />
                                 </div>
@@ -294,34 +282,34 @@ export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStyling
                             <StyleButton
                                 icon={<CornerSquareIcon />}
                                 label="square"
-                                isActive={qrConfig.style.cornersSquareOptions?.type === "square"}
-                                onClick={() => updateStyleOption('cornersSquareOptions', 'type', 'square')}
+                                isActive={qrCodeStyle.style.cornersSquareOptions?.type === "square"}
+                                onClick={() => setCornersSquareType('square')}
                             />
                             <StyleButton
                                 icon={<CornerDotIcon />}
                                 label="dot"
-                                isActive={qrConfig.style.cornersSquareOptions?.type === "dot"}
-                                onClick={() => updateStyleOption('cornersSquareOptions', 'type', 'dot')}
+                                isActive={qrCodeStyle.style.cornersSquareOptions?.type === "dot"}
+                                onClick={() => setCornersSquareType('dot')}
                             />
                             <StyleButton
                                 icon={<CornerExtraRoundedIcon />}
                                 label="extra rounded"
-                                isActive={qrConfig.style.cornersSquareOptions?.type === "extra-rounded"}
-                                onClick={() => updateStyleOption('cornersSquareOptions', 'type', 'extra-rounded')}
+                                isActive={qrCodeStyle.style.cornersSquareOptions?.type === "extra-rounded"}
+                                onClick={() => setCornersSquareType('extra-rounded')}
                             />
                             <StyleButton
                                 icon={<CornerNoneIcon />}
                                 label="none"
-                                isActive={!qrConfig.style.cornersSquareOptions?.type}
-                                onClick={() => updateStyleOption('cornersSquareOptions', 'type', undefined)}
+                                isActive={!qrCodeStyle.style.cornersSquareOptions?.type}
+                                onClick={() => setCornersSquareType(undefined)}
                             />
                         </div>
                     </div>
                     <div className="space-y-2">
                         <Label className="text-sm">Border Color</Label>
                         <div className="flex gap-2">
-                            <Input type="color" className="w-12 h-9 p-1" value={qrConfig.style.cornersSquareOptions?.color || "#000000"} onChange={(e) => updateStyleOption('cornersSquareOptions', 'color', e.target.value)} />
-                            <Input value={qrConfig.style.cornersSquareOptions?.color || "#000000"} onChange={(e) => updateStyleOption('cornersSquareOptions', 'color', e.target.value)} />
+                            <Input type="color" className="w-12 h-9 p-1" value={qrCodeStyle.style.cornersSquareOptions?.color || "#000000"} onChange={(e) => setCornersSquareColor(e.target.value)} />
+                            <Input value={qrCodeStyle.style.cornersSquareOptions?.color || "#000000"} onChange={(e) => setCornersSquareColor(e.target.value)} />
                         </div>
                     </div>
 
@@ -332,28 +320,28 @@ export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStyling
                             <StyleButton
                                 icon={<CornerCenterSquareIcon />}
                                 label="square"
-                                isActive={qrConfig.style.cornersDotOptions?.type === "square"}
-                                onClick={() => updateStyleOption('cornersDotOptions', 'type', 'square')}
+                                isActive={qrCodeStyle.style.cornersDotOptions?.type === "square"}
+                                onClick={() => setCornersDotType('square')}
                             />
                             <StyleButton
                                 icon={<CornerCenterDotIcon />}
                                 label="dot"
-                                isActive={qrConfig.style.cornersDotOptions?.type === "dot"}
-                                onClick={() => updateStyleOption('cornersDotOptions', 'type', 'dot')}
+                                isActive={qrCodeStyle.style.cornersDotOptions?.type === "dot"}
+                                onClick={() => setCornersDotType('dot')}
                             />
                             <StyleButton
                                 icon={<CornerNoneIcon />}
                                 label="none"
-                                isActive={!qrConfig.style.cornersDotOptions?.type}
-                                onClick={() => updateStyleOption('cornersDotOptions', 'type', undefined)}
+                                isActive={!qrCodeStyle.style.cornersDotOptions?.type}
+                                onClick={() => setCornersDotType(undefined)}
                             />
                         </div>
                     </div>
                     <div className="space-y-2">
                         <Label className="text-sm">Center Color</Label>
                         <div className="flex gap-2">
-                            <Input type="color" className="w-12 h-9 p-1" value={qrConfig.style.cornersDotOptions?.color || "#000000"} onChange={(e) => updateStyleOption('cornersDotOptions', 'color', e.target.value)} />
-                            <Input value={qrConfig.style.cornersDotOptions?.color || "#000000"} onChange={(e) => updateStyleOption('cornersDotOptions', 'color', e.target.value)} />
+                            <Input type="color" className="w-12 h-9 p-1" value={qrCodeStyle.style.cornersDotOptions?.color || "#000000"} onChange={(e) => setCornersDotColor(e.target.value)} />
+                            <Input value={qrCodeStyle.style.cornersDotOptions?.color || "#000000"} onChange={(e) => setCornersDotColor(e.target.value)} />
                         </div>
                     </div>
                 </div>
@@ -362,16 +350,16 @@ export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStyling
             {/* Background Configuration */}
             <CustomAccordionItem title="Background" icon={<Palette className="w-4 h-4" />}>
                 <div className="space-y-4 pt-2">
-                    <Tabs value={qrConfig.style.backgroundOptions?.gradient ? "gradient" : "solid"} onValueChange={(v) => {
+                    <Tabs value={qrCodeStyle.style.backgroundOptions?.gradient ? "gradient" : "solid"} onValueChange={(v) => {
                         if (v === "solid") {
-                            updateStyleOption('backgroundOptions', 'gradient', undefined);
-                            updateStyleOption('backgroundOptions', 'color', qrConfig.style.backgroundOptions?.gradient?.colorStops?.[0]?.color || "#ffffff");
+                            setBackgroundGradient(undefined);
+                            setBackgroundColor(qrCodeStyle.style.backgroundOptions?.gradient?.colorStops?.[0]?.color || "#ffffff");
                         } else {
-                            updateStyleOption('backgroundOptions', 'color', undefined);
-                            updateStyleOption('backgroundOptions', 'gradient', {
+                            setBackgroundColor(undefined);
+                            setBackgroundGradient({
                                 type: "linear",
                                 rotation: 0,
-                                colorStops: [{ offset: 0, color: qrConfig.style.backgroundOptions?.color || "#ffffff" }, { offset: 1, color: qrConfig.style.backgroundOptions?.color || "#ffffff" }]
+                                colorStops: [{ offset: 0, color: qrCodeStyle.style.backgroundOptions?.color || "#ffffff" }, { offset: 1, color: qrCodeStyle.style.backgroundOptions?.color || "#ffffff" }]
                             });
                         }
                     }}>
@@ -381,51 +369,51 @@ export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStyling
                         </TabsList>
                         <TabsContent value="solid" className="mt-2">
                             <div className="flex gap-2">
-                                <Input type="color" className="w-12 h-9 p-1" value={qrConfig.style.backgroundOptions?.color || "#ffffff"} onChange={(e) => updateStyleOption('backgroundOptions', 'color', e.target.value)} />
-                                <Input value={qrConfig.style.backgroundOptions?.color || "#ffffff"} onChange={(e) => updateStyleOption('backgroundOptions', 'color', e.target.value)} />
+                                <Input type="color" className="w-12 h-9 p-1" value={qrCodeStyle.style.backgroundOptions?.color || "#ffffff"} onChange={(e) => setBackgroundColor(e.target.value)} />
+                                <Input value={qrCodeStyle.style.backgroundOptions?.color || "#ffffff"} onChange={(e) => setBackgroundColor(e.target.value)} />
                             </div>
                         </TabsContent>
                         <TabsContent value="gradient" className="mt-2 space-y-3">
                             <div className="flex gap-2">
-                                <Button size="sm" variant={qrConfig.style.backgroundOptions?.gradient?.type === "linear" ? "default" : "outline"} onClick={() => {
-                                    const current = qrConfig.style.backgroundOptions?.gradient || { colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }], rotation: 0 };
-                                    updateStyleOption('backgroundOptions', 'gradient', { ...current, type: "linear" });
+                                <Button size="sm" variant={qrCodeStyle.style.backgroundOptions?.gradient?.type === "linear" ? "default" : "outline"} onClick={() => {
+                                    const current = qrCodeStyle.style.backgroundOptions?.gradient || { colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }], rotation: 0 };
+                                    setBackgroundGradient({ ...current, type: "linear" });
                                 }}>Linear</Button>
-                                <Button size="sm" variant={qrConfig.style.backgroundOptions?.gradient?.type === "radial" ? "default" : "outline"} onClick={() => {
-                                    const current = qrConfig.style.backgroundOptions?.gradient || { colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }], rotation: 0 };
-                                    updateStyleOption('backgroundOptions', 'gradient', { ...current, type: "radial" });
+                                <Button size="sm" variant={qrCodeStyle.style.backgroundOptions?.gradient?.type === "radial" ? "default" : "outline"} onClick={() => {
+                                    const current = qrCodeStyle.style.backgroundOptions?.gradient || { colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }], rotation: 0 };
+                                    setBackgroundGradient({ ...current, type: "radial" });
                                 }}>Radial</Button>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                                 <div className="space-y-1">
                                     <Label className="text-xs">Start</Label>
-                                    <Input type="color" className="w-full h-8 p-1" value={qrConfig.style.backgroundOptions?.gradient?.colorStops?.[0]?.color || "#ffffff"} onChange={(e) => {
-                                        const current = qrConfig.style.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
+                                    <Input type="color" className="w-full h-8 p-1" value={qrCodeStyle.style.backgroundOptions?.gradient?.colorStops?.[0]?.color || "#ffffff"} onChange={(e) => {
+                                        const current = qrCodeStyle.style.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
                                         const newStops = [...(current.colorStops || [])];
                                         if (!newStops[0]) newStops[0] = { offset: 0, color: e.target.value };
                                         else newStops[0] = { ...newStops[0], color: e.target.value };
-                                        updateStyleOption('backgroundOptions', 'gradient', { ...current, colorStops: newStops });
+                                        setBackgroundGradient({ ...current, colorStops: newStops });
                                     }} />
                                 </div>
                                 <div className="space-y-1">
                                     <Label className="text-xs">End</Label>
-                                    <Input type="color" className="w-full h-8 p-1" value={qrConfig.style.backgroundOptions?.gradient?.colorStops?.[1]?.color || "#ffffff"} onChange={(e) => {
-                                        const current = qrConfig.style.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
+                                    <Input type="color" className="w-full h-8 p-1" value={qrCodeStyle.style.backgroundOptions?.gradient?.colorStops?.[1]?.color || "#ffffff"} onChange={(e) => {
+                                        const current = qrCodeStyle.style.backgroundOptions?.gradient || { type: "linear", rotation: 0, colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
                                         const newStops = [...(current.colorStops || [])];
                                         if (!newStops[1]) newStops[1] = { offset: 1, color: e.target.value };
                                         else newStops[1] = { ...newStops[1], color: e.target.value };
-                                        updateStyleOption('backgroundOptions', 'gradient', { ...current, colorStops: newStops });
+                                        setBackgroundGradient({ ...current, colorStops: newStops });
                                     }} />
                                 </div>
                             </div>
                             <div className="space-y-1">
-                                <Label className="text-xs">Rotation ({Math.round((qrConfig.style.backgroundOptions?.gradient?.rotation || 0) * 180 / Math.PI)}°)</Label>
+                                <Label className="text-xs">Rotation ({Math.round((qrCodeStyle.style.backgroundOptions?.gradient?.rotation || 0) * 180 / Math.PI)}°)</Label>
                                 <Slider
                                     min={0} max={360} step={15}
-                                    value={[Math.round((qrConfig.style.backgroundOptions?.gradient?.rotation || 0) * 180 / Math.PI)]}
+                                    value={[Math.round((qrCodeStyle.style.backgroundOptions?.gradient?.rotation || 0) * 180 / Math.PI)]}
                                     onValueChange={(vals) => {
-                                        const current = qrConfig.style.backgroundOptions?.gradient || { type: "linear", colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
-                                        updateStyleOption('backgroundOptions', 'gradient', { ...current, rotation: vals[0] * (Math.PI / 180) });
+                                        const current = qrCodeStyle.style.backgroundOptions?.gradient || { type: "linear", colorStops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#ffffff" }] };
+                                        setBackgroundGradient({ ...current, rotation: vals[0] * (Math.PI / 180) });
                                     }}
                                 />
                             </div>
@@ -439,10 +427,10 @@ export function QRStylingConfig({ qrConfig, onChange, onImageUpload }: QRStyling
                 <div className="space-y-4 pt-2">
                     <div className="space-y-3">
                         <Label>Upload Logo</Label>
-                        <Input type="file" accept="image/*" onChange={onImageUpload} />
+                        <Input type="file" accept="image/*" onChange={handleLogoUpload} />
                         <div className="space-y-2">
                             <Label>Logo Margin</Label>
-                            <Slider defaultValue={[0]} max={20} step={1} onValueChange={(vals) => updateStyleOption('imageOptions', 'margin', vals[0])} />
+                            <Slider defaultValue={[0]} max={20} step={1} onValueChange={(vals) => setImageMargin(vals[0])} />
                         </div>
                     </div>
                 </div>

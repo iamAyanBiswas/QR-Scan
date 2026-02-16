@@ -112,9 +112,10 @@ declare global {
     >;
 
     interface QRCodeStyle {
+        publicImage: boolean;
         template: string;
         style: QRStyleOptions;
-        frame?: unknown
+        frame?: unknown;
     }
 
 

@@ -17,6 +17,7 @@ import { PagePreview } from "@/components/block/page-preview";
 import { DEFAULT_BUSINESS_CARD, DEFAULT_COUPON, DEFAULT_MENU, DEFAULT_EVENT_PAGE, DEFAULT_MARKETING, DEFAULT_TEXT_PAGE } from "@/config/qr-page-builder";
 import { StepIndicator } from "@/components/custom/step-indicator";
 import { QRStylingConfig } from "@/components/block/qr-styling-config";
+import { useQrStyleStore } from "@/store/qr-style-store";
 
 
 function InputField({ name, placeholder, label, value, onChange, type = "text", }: {
@@ -49,7 +50,7 @@ export default function QRCodeGenerator() {
     const [expiresAt, setExpiresAt] = useState("");
     const [type, setType] = useState<QRType>("url");
     const [data, setData] = useState<any>({});
-    const [qrCodeStyle, setQrCodeStyle] = useState<QRCodeStyle>({ template: "general-minimal", style: {} });
+    const { qrCodeStyle, logoFile, setQrCodeStyle, setLogoFile } = useQrStyleStore();
 
     // Dynamic QR State
     const [isSaving, setIsSaving] = useState(false);
@@ -59,7 +60,6 @@ export default function QRCodeGenerator() {
 
     const [step, setStep] = useState<1 | 2>(2);
     const [shortId, setShortId] = useState<string | null>(null);
-    const [logoFile, setLogoFile] = useState<File | null>(null); // To store selected file for upload
 
 
     const ref = useRef<HTMLDivElement>(null);
@@ -236,21 +236,7 @@ export default function QRCodeGenerator() {
 
 
 
-    //Design image handle
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setLogoFile(file); // Store file for upload on save
-            const reader = new FileReader();
-            reader.onload = () => {
-                setQrCodeStyle(prev => ({
-                    ...prev,
-                    style: { ...prev.style, image: reader.result as string }
-                }));
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+
 
 
     // Social Media State Helper
@@ -526,11 +512,7 @@ export default function QRCodeGenerator() {
 
                                 /* STEP 2: DESIGN/CUSTOMIZE */
                                 <div className="space-y-6">
-                                    <QRStylingConfig
-                                        qrConfig={qrCodeStyle}
-                                        onChange={setQrCodeStyle}
-                                        onImageUpload={handleImageUpload}
-                                    />
+                                    <QRStylingConfig />
 
                                     <Button onClick={handleFinalSave} className="w-full mt-6" size="lg" disabled={isSaving}>
                                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
