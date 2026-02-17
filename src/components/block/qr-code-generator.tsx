@@ -16,6 +16,7 @@ import { PageBuilderForm } from "@/components/block/page-builder-form";
 import { PagePreview } from "@/components/block/page-preview";
 import { DEFAULT_BUSINESS_CARD, DEFAULT_COUPON, DEFAULT_MENU, DEFAULT_EVENT_PAGE, DEFAULT_MARKETING, DEFAULT_TEXT_PAGE } from "@/config/qr-page-builder";
 import { StepIndicator } from "@/components/custom/step-indicator";
+import { UtmUrlInput } from "@/components/custom/utm-url-input";
 import { QRStylingConfig } from "@/components/block/qr-styling-config";
 import { useQrStyleStore } from "@/store/qr-style-store";
 
@@ -423,7 +424,10 @@ export default function QRCodeGenerator() {
                                                 <PageBuilderForm type={type} data={data} onChange={setData} />
                                             ) : (
                                                 <div className="space-y-4">
-                                                    {type === "url" && <InputField name="value" label={type === "url" ? "Website URL" : "Text"} placeholder="Enter content..." value={data.value || ""} onChange={handleChange("value")} />}
+                                                    {type === 'url' && <UtmUrlInput value={data.value || ""} onChange={(e) => {
+                                                        setData((prev: any) => ({ ...prev, url: e }));
+                                                    }} />}
+                                                    {/* {type === "url" && <InputField name="value" label={type === "url" ? "Website URL" : "Text"} placeholder="Enter content..." value={data.value || ""} onChange={handleChange("value")} />} */}
 
                                                     {type === "social" && (
                                                         <div className="space-y-4">
