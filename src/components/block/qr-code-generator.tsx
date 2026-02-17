@@ -425,7 +425,7 @@ export default function QRCodeGenerator() {
                                             ) : (
                                                 <div className="space-y-4">
                                                     {type === 'url' && <UtmUrlInput value={data.value || ""} onChange={(e) => {
-                                                        setData((prev: any) => ({ ...prev, url: e }));
+                                                        setData((prev: any) => ({ ...prev, value: e }));
                                                     }} />}
                                                     {/* {type === "url" && <InputField name="value" label={type === "url" ? "Website URL" : "Text"} placeholder="Enter content..." value={data.value || ""} onChange={handleChange("value")} />} */}
 

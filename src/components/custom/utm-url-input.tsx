@@ -141,7 +141,7 @@ export function UtmUrlInput({ value: propValue, onChange, placeholder = "https:/
                             UTM
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent className="sm:max-w-106.25">
                         <DialogHeader>
                             <DialogTitle>UTM Parameters</DialogTitle>
                             <DialogDescription>
