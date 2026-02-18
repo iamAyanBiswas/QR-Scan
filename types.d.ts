@@ -1,6 +1,6 @@
 import type { Options as QRCodeStylingConfig } from "qr-code-styling"
 declare global {
-    type QrRedirectType = "url" | "social" | "app" | "payment" | "location"
+    type QrRedirectType = "url" | "app" | "payment"
     type QrPageType = "couponPage" | "businessCard" | "menuCard" | "eventPage" | "marketingPage" | "textPage"
     type QRType = QrPageType | QrRedirectType
 

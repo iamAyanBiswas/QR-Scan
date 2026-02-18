@@ -17,6 +17,7 @@ import { PagePreview } from "@/components/block/page-preview";
 import { DEFAULT_BUSINESS_CARD, DEFAULT_COUPON, DEFAULT_MENU, DEFAULT_EVENT_PAGE, DEFAULT_MARKETING, DEFAULT_TEXT_PAGE } from "@/config/qr-page-builder";
 import { StepIndicator } from "@/components/custom/step-indicator";
 import { UtmUrlInput } from "@/components/custom/utm-url-input";
+import { IconImageInput } from "@/components/custom/input";
 import { QRStylingConfig } from "@/components/block/qr-styling-config";
 import { useQrStyleStore } from "@/store/qr-style-store";
 
@@ -234,33 +235,6 @@ export default function QRCodeGenerator() {
     };
 
 
-
-
-
-
-    // Social Media State Helper
-    const addPlatform = () => {
-        setData((prev: any) => ({
-            ...prev,
-            platforms: [...(prev.platforms || []), { platform: "instagram", url: "" }]
-        }));
-    };
-
-    const updatePlatform = (index: number, key: "platform" | "url", value: string) => {
-        setData((prev: any) => {
-            const newPlatforms = [...(prev.platforms || [])];
-            newPlatforms[index] = { ...newPlatforms[index], [key]: value };
-            return { ...prev, platforms: newPlatforms };
-        });
-    };
-
-    const removePlatform = (index: number) => {
-        setData((prev: any) => ({
-            ...prev,
-            platforms: prev.platforms.filter((_: any, i: number) => i !== index)
-        }));
-    };
-
     const handleTypeChange = (t: QRType) => {
         setType(t);
         setShortUrl(null);
@@ -272,7 +246,6 @@ export default function QRCodeGenerator() {
         else if (t === "eventPage") setData(DEFAULT_EVENT_PAGE);
         else if (t === "marketingPage") setData(DEFAULT_MARKETING);
         else if (t === "textPage") setData(DEFAULT_TEXT_PAGE);
-        else if (t === "social") setData({ platforms: [{ platform: "instagram", url: "" }] });
         else if (t === "app") setData({ ios: "", android: "", fallback: "" });
         else if (t === "payment") setData({ recipient: "", amount: "", currency: "USD" });
         else setData({});
@@ -287,9 +260,7 @@ export default function QRCodeGenerator() {
     // QR Type configurations for visual cards
     const qrTypeCards = [
         { type: "url" as QRType, icon: LinkIcon, label: "URL", description: "Simple website link", category: "redirects" },
-        { type: "social" as QRType, icon: Users, label: "Social Bio", description: "Multiple social links", category: "redirects" },
         { type: "app" as QRType, icon: AppWindow, label: "App Store", description: "iOS/Android apps", category: "redirects" },
-        { type: "location" as QRType, icon: MapPin, label: "Location", description: "GPS coordinates", category: "redirects" },
         { type: "payment" as QRType, icon: CreditCard, label: "Payment", description: "Payment details", category: "redirects" },
         { type: "businessCard" as QRType, icon: Briefcase, label: "Business Card", description: "Contact information", category: "pages" },
         { type: "couponPage" as QRType, icon: Ticket, label: "Coupon", description: "Discount codes", category: "pages" },
@@ -297,7 +268,15 @@ export default function QRCodeGenerator() {
         { type: "eventPage" as QRType, icon: Calendar, label: "Event", description: "Event details", category: "pages" },
         { type: "marketingPage" as QRType, icon: Megaphone, label: "Marketing", description: "Landing page", category: "pages" },
         { type: "textPage" as QRType, icon: FileText, label: "Text Page", description: "Rich text content", category: "pages" },
+
     ];
+
+    //App redirect 
+    const appRedirectIconsURL = {
+        playstore: "https://img.icons8.com/fluency/48/google-play-store-new.png",
+        appstore: "https://img.icons8.com/fluency/48/apple-app-store.png",
+        fallback: "https://img.icons8.com/pulsar-gradient/48/external-link.png"
+    }
 
     return (
         <div className="w-full max-w-7xl mx-auto p-0 space-y-6">
@@ -427,77 +406,18 @@ export default function QRCodeGenerator() {
                                                     {type === 'url' && <UtmUrlInput value={data.value || ""} onChange={(e) => {
                                                         setData((prev: any) => ({ ...prev, value: e }));
                                                     }} />}
-                                                    {/* {type === "url" && <InputField name="value" label={type === "url" ? "Website URL" : "Text"} placeholder="Enter content..." value={data.value || ""} onChange={handleChange("value")} />} */}
-
-                                                    {type === "social" && (
-                                                        <div className="space-y-4">
-                                                            <div className="flex justify-between items-center">
-                                                                <Label>Social Platforms</Label>
-                                                                <Button variant="outline" size="sm" onClick={addPlatform}>+ Add Platform</Button>
-                                                            </div>
-                                                            <div className="space-y-3">
-                                                                {data.platforms?.map((p: any, i: number) => (
-                                                                    <div key={i} className="flex gap-2 items-start">
-                                                                        <div className="grid grid-cols-3 gap-2 w-full">
-                                                                            <select
-                                                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                                                                                value={p.platform}
-                                                                                onChange={(e) => updatePlatform(i, "platform", e.target.value)}
-                                                                            >
-                                                                                <option value="instagram">Instagram</option>
-                                                                                <option value="facebook">Facebook</option>
-                                                                                <option value="twitter">X (Twitter)</option>
-                                                                                <option value="linkedin">LinkedIn</option>
-                                                                                <option value="tiktok">TikTok</option>
-                                                                                <option value="youtube">YouTube</option>
-                                                                                <option value="github">GitHub</option>
-                                                                                <option value="website">Website</option>
-                                                                            </select>
-                                                                            <Input
-                                                                                placeholder="URL"
-                                                                                value={p.url}
-                                                                                onChange={(e) => updatePlatform(i, "url", e.target.value)}
-                                                                                className="col-span-2"
-                                                                            />
-                                                                        </div>
-                                                                        <Button variant="ghost" size="icon" onClick={() => removePlatform(i)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
 
                                                     {type === "app" && (
                                                         <div className="space-y-4">
-                                                            <InputField name="ios" label="iOS App Store URL" placeholder="https://apps.apple.com/..." value={data.ios || ""} onChange={handleChange("ios")} />
-                                                            <InputField name="android" label="Google Play Store URL" placeholder="https://play.google.com/..." value={data.android || ""} onChange={handleChange("android")} />
-                                                            <InputField name="fallback" label="Fallback URL (Web)" placeholder="https://myapp.com" value={data.fallback || ""} onChange={handleChange("fallback")} />
+                                                            <IconImageInput name="ios" label="iOS App Store URL" placeholder="https://apps.apple.com/..." url={appRedirectIconsURL.appstore} value={data.ios || ""} onChange={(e) => { setData((prev: any) => ({ ...prev, ios: e.target.value })) }} />
+                                                            <IconImageInput name="android" label="Google Play Store URL" placeholder="https://play.google.com/..." url={appRedirectIconsURL.playstore} value={data.android || ""} onChange={(e) => { setData((prev: any) => ({ ...prev, android: e.target.value })) }} />
+                                                            <IconImageInput name="fallback" label="Fallback URL (Web)" placeholder="https://myapp.com" url={appRedirectIconsURL.fallback} value={data.fallback || ""} onChange={(e) => { setData((prev: any) => ({ ...prev, fallback: e.target.value })) }} />
                                                         </div>
                                                     )}
 
                                                     {type === "payment" && (
                                                         <div className="space-y-4">
-                                                            <div className="grid grid-cols-2 gap-4">
-                                                                <InputField name="recipient" label="Recipient Name" placeholder="Business Name" value={data.recipient || ""} onChange={handleChange("recipient")} />
-                                                                <div className="space-y-2">
-                                                                    <Label>Amount (Fixed)</Label>
-                                                                    <div className="flex gap-2">
-                                                                        <Input className="w-20" placeholder="$" value={data.currency || "USD"} onChange={handleChange("currency")} />
-                                                                        <Input placeholder="10.00" value={data.amount || ""} onChange={handleChange("amount")} />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <InputField name="paypal" label="PayPal Username" placeholder="username" value={data.paypal || ""} onChange={handleChange("paypal")} />
-                                                            <InputField name="upi" label="UPI ID (India)" placeholder="user@upi" value={data.upi || ""} onChange={handleChange("upi")} />
-                                                        </div>
-                                                    )}
 
-                                                    {/* Existing Types */}
-
-                                                    {type === "location" && (
-                                                        <div className="grid grid-cols-2 gap-4">
-                                                            <InputField name="latitude" label="Latitude" placeholder="40.7128" value={data.latitude || ""} onChange={handleChange("latitude")} />
-                                                            <InputField name="longitude" label="Longitude" placeholder="-74.0060" value={data.longitude || ""} onChange={handleChange("longitude")} />
                                                         </div>
                                                     )}
 
