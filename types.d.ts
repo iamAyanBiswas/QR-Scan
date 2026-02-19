@@ -86,8 +86,6 @@ declare global {
 
 
     interface SocialData {
-        platforms: { platform: string; url: string; }[];
-        autoRedirect?: boolean; // If true, tries to detect user agent or just shows a list
     }
 
     interface AppData {
@@ -96,15 +94,52 @@ declare global {
         fallbackUrl: string;
     }
 
-    interface PaymentData {
+    // --- Payment: type-safe discriminated union ---
+    type PaymentGateway = "paypal" | "stripe" | "upi" | "crypto" | "custom";
+
+    interface PaymentBaseConfig {
         recipientName: string;
-        amount?: string;
-        currency?: string;
-        paypalHandle?: string;
-        upiId?: string;
-        // Stripe link or other payment links
-        customLink?: string;
+        amount: string;
+        currency: string;
     }
+
+    interface PaypalPaymentData {
+        gateway: "paypal";
+        config: PaymentBaseConfig & {
+            paypalHandle: string;
+        };
+    }
+
+    interface StripePaymentData {
+        gateway: "stripe";
+        config: PaymentBaseConfig & {
+            stripeLink: string;
+        };
+    }
+
+    interface UpiPaymentData {
+        gateway: "upi";
+        config: PaymentBaseConfig & {
+            upiId: string;
+        };
+    }
+
+    interface CryptoPaymentData {
+        gateway: "crypto";
+        config: PaymentBaseConfig & {
+            walletAddress: string;
+            network?: string;
+        };
+    }
+
+    interface CustomPaymentData {
+        gateway: "custom";
+        config: {
+            url: string;
+        };
+    }
+
+    type PaymentData = PaypalPaymentData | StripePaymentData | UpiPaymentData | CryptoPaymentData | CustomPaymentData;
     // Exclude: type, width, height, data, nodeCanvas, jsdom, qrOptions
     type QRStyleOptions = Omit<
         QRCodeStylingConfig,
