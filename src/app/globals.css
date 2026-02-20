@@ -65,6 +65,10 @@
   --color-main-800: var(--main-800);
   --color-main-850: var(--main-850);
   --color-main-900: var(--main-900);
+
+  /* according to custom theme const color for after scan page */
+  --color-custom-theme: var(--custom-theme);
+  --color-custom-relative-theme: color-mix(in oklab, var(--custom-theme), white 40%);
 }
 
 :root {
@@ -121,6 +125,11 @@
   --main-800: #202020;
   --main-850: #101010;
   --main-900: #000000;
+
+
+  /* according to custom theme const color for after scan page */
+  --custom-theme: #000000;
+
 }
 
 .dark {
@@ -176,6 +185,11 @@
   --main-800: #f8f8f8;
   --main-850: #fdfdfd;
   --main-900: #ffffff;
+
+
+  /* according to custom theme const color for after scan page */
+  --custom-theme: #000000;
+
 }
 
 @layer base {
@@ -187,6 +201,21 @@
     @apply bg-background text-foreground;
   }
 
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full hover:bg-muted-foreground/50 transition-colors;
+  }
 }
 
 

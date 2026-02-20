@@ -13,10 +13,10 @@ declare global {
         description: string;
         expiryDate: string;
         terms: string;
-        brandingColor: string;
         heroImage?: string; // Base64 or URL
         websiteUrl?: string;
         buttonText?: string;
+        themeColor: string;
     }
 
     interface BusinessCardData {
