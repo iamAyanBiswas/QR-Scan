@@ -37,7 +37,7 @@ export function PageBuilderForm({ type, data, onChange }: PageBuilderFormProps) 
 
 
     return (
-        <div className="space-y-4">
+        <div key={type} className="space-y-4">
             <div className="flex items-center gap-2 mb-4 p-2 bg-muted/50 rounded-lg">
                 {type === "couponPage" && <Ticket className="w-5 h-5 text-primary" />}
                 {type === "businessCard" && <Briefcase className="w-5 h-5 text-primary" />}
@@ -51,28 +51,29 @@ export function PageBuilderForm({ type, data, onChange }: PageBuilderFormProps) 
             </div>
 
             {type === "couponPage" ? (
+
                 <div className="space-y-4">
                     <div className="space-y-2">
                         <Label>Campaign Title</Label>
-                        <Input value={data.title || ""} onChange={(e) => handleChange("title", e.target.value)} />
+                        <Input value={data.title ?? ""} onChange={(e) => handleChange("title", e.target.value)} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Discount Code</Label>
-                            <Input value={data.discountCode || ""} onChange={(e) => handleChange("discountCode", e.target.value)} />
+                            <Input value={data.discountCode ?? ""} onChange={(e) => handleChange("discountCode", e.target.value)} />
                         </div>
                         <div className="space-y-2">
                             <Label>Value Label</Label>
-                            <Input value={data.discountValue || ""} onChange={(e) => handleChange("discountValue", e.target.value)} placeholder="50% OFF" />
+                            <Input value={data.discountValue ?? ""} onChange={(e) => handleChange("discountValue", e.target.value)} placeholder="50% OFF" />
                         </div>
                     </div>
                     <div className="space-y-2">
                         <Label>Description</Label>
-                        <Textarea value={data.description || ""} onChange={(e) => handleChange("description", e.target.value)} rows={3} />
+                        <Textarea value={data.description ?? ""} onChange={(e) => handleChange("description", e.target.value)} rows={3} />
                     </div>
                     <div className="space-y-2">
                         <Label>Expiry Date</Label>
-                        <Input type="date" value={data.expiryDate || ""} onChange={(e) => handleChange("expiryDate", e.target.value)} />
+                        <Input type="date" value={data.expiryDate ?? ""} onChange={(e) => handleChange("expiryDate", e.target.value)} />
                     </div>
                     <div className="space-y-2">
                         <Label>Hero Image</Label>
@@ -81,13 +82,13 @@ export function PageBuilderForm({ type, data, onChange }: PageBuilderFormProps) 
                     <div className="space-y-2">
                         <Label>Theme Color</Label>
                         <div className="flex gap-2">
-                            <Input type="color" className="w-12 h-10 p-1" value={data.brandingColor || "#ec4899"} onChange={(e) => handleChange("brandingColor", e.target.value)} />
-                            <Input value={data.brandingColor || ""} onChange={(e) => handleChange("brandingColor", e.target.value)} />
+                            <Input type="color" className="w-12 h-10 p-1" value={data.themeColor || "#ec4899"} onChange={(e) => handleChange("themeColor", e.target.value)} />
+                            <Input value={data.themeColor ?? ""} onChange={(e) => handleChange("themeColor", e.target.value)} />
                         </div>
                     </div>
                     <div className="space-y-2">
                         <Label>Website URL</Label>
-                        <Input value={data.websiteUrl || ""} onChange={(e) => handleChange("websiteUrl", e.target.value)} placeholder="https://..." />
+                        <Input value={data.websiteUrl ?? ""} onChange={(e) => handleChange("websiteUrl", e.target.value)} placeholder="https://..." />
                     </div>
                 </div>
             ) : type === "businessCard" ? (
@@ -99,52 +100,52 @@ export function PageBuilderForm({ type, data, onChange }: PageBuilderFormProps) 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Full Name</Label>
-                            <Input value={data.fullName || ""} onChange={(e) => handleChange("fullName", e.target.value)} />
+                            <Input value={data.fullName ?? ""} onChange={(e) => handleChange("fullName", e.target.value)} />
                         </div>
                         <div className="space-y-2">
                             <Label>Job Title</Label>
-                            <Input value={data.title || ""} onChange={(e) => handleChange("title", e.target.value)} />
+                            <Input value={data.title ?? ""} onChange={(e) => handleChange("title", e.target.value)} />
                         </div>
                     </div>
                     <div className="space-y-2">
                         <Label>Company</Label>
-                        <Input value={data.company || ""} onChange={(e) => handleChange("company", e.target.value)} />
+                        <Input value={data.company ?? ""} onChange={(e) => handleChange("company", e.target.value)} />
                     </div>
                     <div className="space-y-2">
                         <Label>Bio</Label>
-                        <Textarea value={data.bio || ""} onChange={(e) => handleChange("bio", e.target.value)} rows={3} />
+                        <Textarea value={data.bio ?? ""} onChange={(e) => handleChange("bio", e.target.value)} rows={3} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Email</Label>
-                            <Input value={data.email || ""} onChange={(e) => handleChange("email", e.target.value)} />
+                            <Input value={data.email ?? ""} onChange={(e) => handleChange("email", e.target.value)} />
                         </div>
                         <div className="space-y-2">
                             <Label>Phone</Label>
-                            <Input value={data.phone || ""} onChange={(e) => handleChange("phone", e.target.value)} />
+                            <Input value={data.phone ?? ""} onChange={(e) => handleChange("phone", e.target.value)} />
                         </div>
                         <div className="space-y-2">
                             <Label>Twiter</Label>
-                            <Input value={data.twitter || ""} onChange={(e) => handleChange("twitter", e.target.value)} />
+                            <Input value={data.twitter ?? ""} onChange={(e) => handleChange("twitter", e.target.value)} />
                         </div>
                         <div className="space-y-2">
                             <Label>Linkedin</Label>
-                            <Input value={data.linkedin || ""} onChange={(e) => handleChange("linkedin", e.target.value)} />
+                            <Input value={data.linkedin ?? ""} onChange={(e) => handleChange("linkedin", e.target.value)} />
                         </div>
                         <div className="space-y-2">
                             <Label>Instagram</Label>
-                            <Input value={data.instagram || ""} onChange={(e) => handleChange("instagram", e.target.value)} />
+                            <Input value={data.instagram ?? ""} onChange={(e) => handleChange("instagram", e.target.value)} />
                         </div>
                         <div className="space-y-2">
                             <Label>Address</Label>
-                            <Input value={data.address || ""} onChange={(e) => handleChange("address", e.target.value)} />
+                            <Input value={data.address ?? ""} onChange={(e) => handleChange("address", e.target.value)} />
                         </div>
                     </div>
                     <div className="space-y-2">
                         <Label>Theme Color</Label>
                         <div className="flex gap-2">
-                            <Input type="color" className="w-12 h-10 p-1" value={data.themeColor || "#000000"} onChange={(e) => handleChange("themeColor", e.target.value)} />
-                            <Input value={data.themeColor || ""} onChange={(e) => handleChange("themeColor", e.target.value)} />
+                            <Input type="color" className="w-12 h-10 p-1" value={data.themeColor ?? "#000000"} onChange={(e) => handleChange("themeColor", e.target.value)} />
+                            <Input value={data.themeColor ?? ""} onChange={(e) => handleChange("themeColor", e.target.value)} />
                         </div>
                     </div>
                 </div>
@@ -164,6 +165,13 @@ export function PageBuilderForm({ type, data, onChange }: PageBuilderFormProps) 
                         <Label>Logo</Label>
                         <Input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, "logo")} />
                     </div>
+                    <div className="space-y-2">
+                        <Label>Theme Color</Label>
+                        <div className="flex gap-2">
+                            <Input type="color" className="w-12 h-10 p-1" value={data.themeColor ?? "#ea580c"} onChange={(e) => handleChange("themeColor", e.target.value)} />
+                            <Input value={data.themeColor ?? ""} onChange={(e) => handleChange("themeColor", e.target.value)} />
+                        </div>
+                    </div>
 
                     <div className="space-y-4 border-t pt-4">
                         <div className="flex justify-between items-center">
@@ -177,7 +185,7 @@ export function PageBuilderForm({ type, data, onChange }: PageBuilderFormProps) 
                         {(data.sections || []).map((section: any, sIdx: number) => (
                             <div key={sIdx} className="border rounded-lg p-4 bg-muted/20 space-y-4">
                                 <div className="flex gap-4 items-center">
-                                    <Input value={section.title} onChange={(e) => {
+                                    <Input value={section.title ?? ""} onChange={(e) => {
                                         const newSections = [...data.sections];
                                         newSections[sIdx].title = e.target.value;
                                         handleChange("sections", newSections as any);
@@ -192,21 +200,21 @@ export function PageBuilderForm({ type, data, onChange }: PageBuilderFormProps) 
                                     {(section.items || []).map((item: any, iIdx: number) => (
                                         <div key={iIdx} className="grid grid-cols-12 gap-2 items-start">
                                             <div className="col-span-4">
-                                                <Input placeholder="Item Name" value={item.name} onChange={(e) => {
+                                                <Input placeholder="Item Name" value={item.name ?? ""} onChange={(e) => {
                                                     const newSections = [...data.sections];
                                                     newSections[sIdx].items[iIdx].name = e.target.value;
                                                     handleChange("sections", newSections as any);
                                                 }} />
                                             </div>
                                             <div className="col-span-2">
-                                                <Input placeholder="Price" value={item.price} onChange={(e) => {
+                                                <Input placeholder="Price" value={item.price ?? ""} onChange={(e) => {
                                                     const newSections = [...data.sections];
                                                     newSections[sIdx].items[iIdx].price = e.target.value;
                                                     handleChange("sections", newSections as any);
                                                 }} />
                                             </div>
                                             <div className="col-span-5">
-                                                <Input placeholder="Description" value={item.description} onChange={(e) => {
+                                                <Input placeholder="Description" value={item.description ?? ""} onChange={(e) => {
                                                     const newSections = [...data.sections];
                                                     newSections[sIdx].items[iIdx].description = e.target.value;
                                                     handleChange("sections", newSections as any);
@@ -257,6 +265,13 @@ export function PageBuilderForm({ type, data, onChange }: PageBuilderFormProps) 
                         <Label>Description</Label>
                         <Textarea value={data.description || ""} onChange={(e) => handleChange("description", e.target.value)} rows={3} />
                     </div>
+                    <div className="space-y-2">
+                        <Label>Theme Color</Label>
+                        <div className="flex gap-2">
+                            <Input type="color" className="w-12 h-10 p-1" value={data.themeColor ?? "#2563eb"} onChange={(e) => handleChange("themeColor", e.target.value)} />
+                            <Input value={data.themeColor ?? ""} onChange={(e) => handleChange("themeColor", e.target.value)} />
+                        </div>
+                    </div>
                     <div className="space-y-4 border-t pt-4">
                         <div className="flex justify-between items-center">
                             <Label>Agenda / Schedule</Label>
@@ -267,12 +282,12 @@ export function PageBuilderForm({ type, data, onChange }: PageBuilderFormProps) 
                         </div>
                         {(data.agenda || []).map((slot: any, idx: number) => (
                             <div key={idx} className="flex gap-2 items-center">
-                                <Input type="time" className="w-32" value={slot.time} onChange={(e) => {
+                                <Input type="time" className="w-32" value={slot.time ?? ""} onChange={(e) => {
                                     const newAgenda = [...data.agenda];
                                     newAgenda[idx].time = e.target.value;
                                     handleChange("agenda", newAgenda as any);
                                 }} />
-                                <Input className="flex-1" placeholder="Activity" value={slot.activity} onChange={(e) => {
+                                <Input className="flex-1" placeholder="Activity" value={slot.activity ?? ""} onChange={(e) => {
                                     const newAgenda = [...data.agenda];
                                     newAgenda[idx].activity = e.target.value;
                                     handleChange("agenda", newAgenda as any);
