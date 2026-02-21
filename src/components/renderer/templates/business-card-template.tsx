@@ -1,10 +1,11 @@
 'use client'
 import React from 'react';
 import { Mail, Phone, Globe, Linkedin, Twitter, Instagram, MapPin, User, Download } from 'lucide-react';
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { RendererButton } from '@/components/renderer/ui/button';
 
 export default function BusinessCardTemplate({ data }: { data: BusinessCardData }) {
+    const theme = data.themeColor || '#f41515'
 
     const handleSaveContact = () => {
         // Simple vCard generation
@@ -28,16 +29,16 @@ END:VCARD`;
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100 dark:bg-zinc-950">
-            <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] overflow-hidden shadow-2xl border border-white/20">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100" style={{ "--custom-theme": theme } as React.CSSProperties}>
+            <div className="w-full max-w-sm bg-white rounded-[2rem] overflow-hidden shadow-2xl border border-white/20">
 
                 {/* Header / Banner */}
                 <div
                     className="h-32 w-full relative"
                     style={{ backgroundColor: data.themeColor || '#000' }}
                 >
-                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 p-1 bg-white dark:bg-zinc-900 rounded-full">
-                        <Avatar className="w-24 h-24 border-4 border-white dark:border-zinc-900">
+                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 p-1 bg-whit rounded-full">
+                        <Avatar className="w-24 h-24 border-4 border-white">
                             <AvatarImage src={data.avatar} className="object-cover" />
                             <AvatarFallback>{data.fullName.slice(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
@@ -46,12 +47,12 @@ END:VCARD`;
 
                 {/* Profile Info */}
                 <div className="pt-16 pb-8 px-6 text-center space-y-2">
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{data.fullName}</h1>
-                    <p className="text-sm font-medium text-primary uppercase tracking-wide">{data.title}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{data.company}</p>
+                    <h1 className="text-2xl font-bold text-gray-900">{data.fullName}</h1>
+                    <p className="text-sm font-medium text-gray-700 uppercase tracking-wide">{data.title}</p>
+                    <p className="text-sm text-gray-500 font-medium">{data.company}</p>
 
                     {data.bio && (
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 leading-relaxed px-2">
+                        <p className="text-sm text-gray-600 mt-4 leading-relaxed px-2">
                             {data.bio}
                         </p>
                     )}
@@ -61,22 +62,22 @@ END:VCARD`;
                 <div className="px-6 pb-8 space-y-4">
                     <div className="grid grid-cols-4 gap-2 mb-6">
                         {data.email && (
-                            <a href={`mailto:${data.email}`} className="flex items-center justify-center w-full aspect-square rounded-2xl bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 hover:bg-primary/10 hover:text-primary transition-colors">
+                            <a href={`mailto:${data.email}`} className="flex items-center justify-center w-full aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <Mail className="w-5 h-5" />
                             </a>
                         )}
                         {data.phone && (
-                            <a href={`tel:${data.phone}`} className="flex items-center justify-center w-full aspect-square rounded-2xl bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 hover:bg-primary/10 hover:text-primary transition-colors">
+                            <a href={`tel:${data.phone}`} className="flex items-center justify-center w-full aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <Phone className="w-5 h-5" />
                             </a>
                         )}
                         {data.website && (
-                            <a href={data.website} target="_blank" className="flex items-center justify-center w-full aspect-square rounded-2xl bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 hover:bg-primary/10 hover:text-primary transition-colors">
+                            <a href={data.website} target="_blank" className="flex items-center justify-center w-full aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <Globe className="w-5 h-5" />
                             </a>
                         )}
                         {data.address && (
-                            <a href={`https://maps.google.com/?q=${data.address}`} target="_blank" className="flex items-center justify-center w-full aspect-square rounded-2xl bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 hover:bg-primary/10 hover:text-primary transition-colors">
+                            <a href={`https://maps.google.com/?q=${data.address}`} target="_blank" className="flex items-center justify-center w-full aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <MapPin className="w-5 h-5" />
                             </a>
                         )}
@@ -84,18 +85,18 @@ END:VCARD`;
 
                     {/* Socials */}
                     <div className="flex justify-center gap-4 text-gray-400">
-                        {data.linkedin && <a href={data.linkedin} target="_blank" className="hover:text-[#0077b5] transition-colors"><Linkedin className="w-5 h-5" /></a>}
-                        {data.twitter && <a href={data.twitter} target="_blank" className="hover:text-[#1DA1F2] transition-colors"><Twitter className="w-5 h-5" /></a>}
-                        {data.instagram && <a href={data.instagram} target="_blank" className="hover:text-[#E1306C] transition-colors"><Instagram className="w-5 h-5" /></a>}
+                        {data.linkedin && <a href={data.linkedin} target="_blank" className="text-[#0077b5]"><Linkedin className="w-5 h-5" /></a>}
+                        {data.twitter && <a href={data.twitter} target="_blank" className="text-[#1DA1F2]"><Twitter className="w-5 h-5" /></a>}
+                        {data.instagram && <a href={data.instagram} target="_blank" className="text-[#E1306C]"><Instagram className="w-5 h-5" /></a>}
                     </div>
 
-                    <Button
+                    <RendererButton
                         onClick={handleSaveContact}
                         className="w-full h-12 rounded-xl text-base shadow-lg"
                         style={{ backgroundColor: data.themeColor || undefined }}
                     >
                         <Download className="w-4 h-4 mr-2" /> Save Contact
-                    </Button>
+                    </RendererButton>
                 </div>
             </div>
         </div>
