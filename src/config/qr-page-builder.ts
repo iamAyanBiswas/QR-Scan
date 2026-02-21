@@ -15,7 +15,7 @@ export const DEFAULT_COUPON: CouponData = {
     description: "Get half off on all items this summer. Limited time offer.",
     expiryDate: "",
     terms: "One use per customer.",
-    brandingColor: "#ec4899",
+    themeColor: "#ec4899",
     buttonText: "Redeem Now"
 };
 
