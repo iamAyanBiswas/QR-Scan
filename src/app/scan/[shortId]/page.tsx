@@ -60,5 +60,5 @@ export default async function ShortLinkPage({
     }
 
     // Render Dynamic Page Templates
-    return <DynamicPageRenderer type={qr.type} data={qr.dynamicData} />;
+    return <DynamicPageRenderer type={qr.type as QrPageType} data={qr.dynamicData} />;
 }
