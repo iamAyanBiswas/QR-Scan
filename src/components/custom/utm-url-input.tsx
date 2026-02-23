@@ -19,9 +19,10 @@ interface UtmUrlInputProps {
     value?: string
     onChange?: (value: string) => void
     placeholder?: string
+    requireStarStyle?: boolean
 }
 
-export function UtmUrlInput({ value: propValue, onChange, placeholder = "https://example.com" }: UtmUrlInputProps) {
+export function UtmUrlInput({ value: propValue, onChange, placeholder = "https://example.com", requireStarStyle = false }: UtmUrlInputProps) {
     const [internalValue, setInternalValue] = useState(propValue || "")
     const [isOpen, setIsOpen] = useState(false)
 
@@ -122,7 +123,7 @@ export function UtmUrlInput({ value: propValue, onChange, placeholder = "https:/
 
     return (
         <div className="space-y-2">
-            <Label htmlFor="website-url">Website URL</Label>
+            <Label htmlFor="website-url">Website URL{requireStarStyle && <span className="text-red-600 text-lg">*</span>}</Label>
             <div className="flex w-full items-center space-x-2">
                 <div className="relative flex-1">
                     <Input
