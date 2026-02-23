@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { QRCreatorShell } from "@/components/block/qr-creator-shell";
 import { IconImageInput } from "@/components/custom/input";
 
@@ -10,36 +12,93 @@ const appRedirectIconsURL = {
     fallback: "https://img.icons8.com/pulsar-gradient/48/external-link.png"
 };
 
+const urlRegex = /^(https?:\/\/)(?:(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}|(?:\d{1,3}\.){3}\d{1,3})(:\d+)?(\/.*)?$/i;
+
+const appDataSchema = z.object({
+    iosUrl: z.string().optional().refine((val) => !val || urlRegex.test(val), "Enter a valid URL"),
+    androidUrl: z.string().optional().refine((val) => !val || urlRegex.test(val), "Enter a valid URL"),
+    fallbackUrl: z.string().min(1, "Fallback URL is required").refine((val) => urlRegex.test(val), "Enter a valid URL"),
+}).refine((data) => data.iosUrl || data.androidUrl, {
+    message: "At least one app store URL (iOS or Android) is required",
+    path: ["iosUrl"]
+}) satisfies z.ZodType<AppData>;
+
+type AppDataFormValues = z.infer<typeof appDataSchema>;
+
 export default function CreateAppStoreQR() {
-    const [data, setData] = useState({ ios: "", android: "", fallback: "" });
+    const form = useForm<AppDataFormValues>({
+        resolver: zodResolver(appDataSchema),
+        defaultValues: { iosUrl: "", androidUrl: "", fallbackUrl: "" },
+        mode: "onChange",
+    });
+
+    const data = form.watch();
+
+    const parsed = appDataSchema.safeParse(data);
+    const normalizedData = parsed.success ? parsed.data : data;
 
     return (
         <div className="flex flex-col items-center justify-center min-h-full">
-            <QRCreatorShell type="app" data={data} onDataChange={setData}>
-                <div className="space-y-4">
-                    <IconImageInput
-                        name="ios"
-                        label="iOS App Store URL"
-                        placeholder="https://apps.apple.com/..."
-                        url={appRedirectIconsURL.appstore}
-                        value={data.ios || ""}
-                        onChange={(e) => setData((prev) => ({ ...prev, ios: e.target.value }))}
+            <QRCreatorShell
+                type="app"
+                data={normalizedData}
+                onDataChange={(newData) => form.reset(newData)}
+                onValidate={() => form.trigger()}
+            >
+                <div className="space-y-4 w-full">
+                    <Controller
+                        name="iosUrl"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                            <div className="space-y-1">
+                                <IconImageInput
+                                    label="iOS App Store URL"
+                                    placeholder="https://apps.apple.com/..."
+                                    url={appRedirectIconsURL.appstore}
+                                    value={field.value || ""}
+                                    onChange={(e) => field.onChange(e.target.value)}
+                                />
+                                {fieldState.error && (
+                                    <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                )}
+                            </div>
+                        )}
                     />
-                    <IconImageInput
-                        name="android"
-                        label="Google Play Store URL"
-                        placeholder="https://play.google.com/..."
-                        url={appRedirectIconsURL.playstore}
-                        value={data.android || ""}
-                        onChange={(e) => setData((prev) => ({ ...prev, android: e.target.value }))}
+                    <Controller
+                        name="androidUrl"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                            <div className="space-y-1">
+                                <IconImageInput
+                                    label="Google Play Store URL"
+                                    placeholder="https://play.google.com/..."
+                                    url={appRedirectIconsURL.playstore}
+                                    value={field.value || ""}
+                                    onChange={(e) => field.onChange(e.target.value)}
+                                />
+                                {fieldState.error && (
+                                    <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                )}
+                            </div>
+                        )}
                     />
-                    <IconImageInput
-                        name="fallback"
-                        label="Fallback URL (Web)"
-                        placeholder="https://myapp.com"
-                        url={appRedirectIconsURL.fallback}
-                        value={data.fallback || ""}
-                        onChange={(e) => setData((prev) => ({ ...prev, fallback: e.target.value }))}
+                    <Controller
+                        name="fallbackUrl"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                            <div className="space-y-1">
+                                <IconImageInput
+                                    label="Fallback URL (Web)"
+                                    placeholder="https://myapp.com"
+                                    url={appRedirectIconsURL.fallback}
+                                    value={field.value || ""}
+                                    onChange={(e) => field.onChange(e.target.value)}
+                                />
+                                {fieldState.error && (
+                                    <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                )}
+                            </div>
+                        )}
                     />
                 </div>
             </QRCreatorShell>
