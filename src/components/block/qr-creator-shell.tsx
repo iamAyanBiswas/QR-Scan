@@ -13,6 +13,16 @@ import { toast } from "sonner";
 import { StepIndicator } from "@/components/custom/step-indicator";
 import { QRStylingConfig } from "@/components/block/qr-styling-config";
 import { useQrStyleStore } from "@/store/qr-style-store";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+const campaignSchema = z.object({
+    title: z.string().min(1, "Campaign name is required").max(100, "Length should not more then 100"),
+    expiresAt: z.string().optional(),
+});
+
+type CampaignFormValues = z.infer<typeof campaignSchema>;
 
 interface QRCreatorShellProps {
     type: QRType;
@@ -20,11 +30,16 @@ interface QRCreatorShellProps {
     onDataChange: (data: any) => void;
     children: React.ReactNode;
     previewSlot?: React.ReactNode;
+    /** Called before handleCreate. Return false to prevent QR creation (e.g. validation failed). */
+    onValidate?: () => Promise<boolean> | boolean;
 }
 
-export function QRCreatorShell({ type, data, onDataChange, children, previewSlot }: QRCreatorShellProps) {
-    const [title, setTitle] = useState("Untitled QR");
-    const [expiresAt, setExpiresAt] = useState("");
+export function QRCreatorShell({ type, data, onDataChange, children, previewSlot, onValidate }: QRCreatorShellProps) {
+    const campaignForm = useForm<CampaignFormValues>({
+        resolver: zodResolver(campaignSchema),
+        defaultValues: { title: "Untitled QR", expiresAt: "" },
+        mode: "onChange",
+    });
     const { qrCodeStyle, logoFile, setQrCodeStyle, setLogoFile } = useQrStyleStore();
 
     // Dynamic QR State
@@ -33,7 +48,6 @@ export function QRCreatorShell({ type, data, onDataChange, children, previewSlot
     const [step, setStep] = useState<1 | 2>(1);
     const [shortId, setShortId] = useState<string | null>(null);
 
-    const ref = useRef<HTMLDivElement>(null);
     const qrCodeRef = useRef<QRCodeStyling | null>(null);
 
     // Callback ref to handle DOM node availability
@@ -78,10 +92,13 @@ export function QRCreatorShell({ type, data, onDataChange, children, previewSlot
     };
 
     const handleCreate = async () => {
-        if (!title) {
-            toast.error("Please enter a title for your QR code");
-            return;
-        }
+        // Validate campaign details (title)
+        const campaignValid = await campaignForm.trigger();
+        // Run category-specific validation (e.g. react-hook-form) if provided
+        const categoryValid = onValidate ? await onValidate() : true;
+        if (!campaignValid || !categoryValid) return;
+
+        const { title, expiresAt } = campaignForm.getValues();
         setIsSaving(true);
         try {
             // Prepare dynamic data
@@ -205,25 +222,40 @@ export function QRCreatorShell({ type, data, onDataChange, children, previewSlot
                                             <p className="text-sm text-muted-foreground">Set up your QR code campaign information</p>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="qr-title">Campaign Name</Label>
-                                                <Input
-                                                    id="qr-title"
-                                                    value={title}
-                                                    onChange={(e) => setTitle(e.target.value)}
-                                                    placeholder="Enter campaign name"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
-                                                <Input
-                                                    id="qr-expiry"
-                                                    type="datetime-local"
-                                                    value={expiresAt}
-                                                    onChange={(e) => setExpiresAt(e.target.value)}
-                                                />
-                                                <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
-                                            </div>
+                                            <Controller
+                                                name="title"
+                                                control={campaignForm.control}
+                                                render={({ field, fieldState }) => (
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="qr-title">Campaign Name</Label>
+                                                        <Input
+                                                            id="qr-title"
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                            placeholder="Enter campaign name"
+                                                        />
+                                                        {fieldState.error && (
+                                                            <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            />
+                                            <Controller
+                                                name="expiresAt"
+                                                control={campaignForm.control}
+                                                render={({ field }) => (
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
+                                                        <Input
+                                                            id="qr-expiry"
+                                                            type="datetime-local"
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                        />
+                                                        <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
+                                                    </div>
+                                                )}
+                                            />
                                         </div>
                                     </div>
 
@@ -273,7 +305,7 @@ export function QRCreatorShell({ type, data, onDataChange, children, previewSlot
                                                     {type === "url" && data.value && (
                                                         <span className="block mt-4 p-2 bg-background border rounded text-xs break-all">
                                                             Redirects to: <br />
-                                                            <span className="text-primary">{data.value.startsWith("http") ? data.value : `https://${data.value}`}</span>
+                                                            <span className="text-primary">{data.value}</span>
                                                         </span>
                                                     )}
                                                 </p>
