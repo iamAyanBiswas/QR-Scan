@@ -4,7 +4,8 @@ declare global {
     type QrPageType = "couponPage" | "businessCard" | "menuCard" | "eventPage" | "marketingPage" | "textPage"
     type QRType = QrPageType | QrRedirectType
 
-    type DynamicPageData = CouponData | BusinessCardData | MenuData | EventPageData | MarketingData | TextPageData | SocialData | AppData | PaymentData
+    type DynamicPageData = CouponData | BusinessCardData | MenuData | EventPageData | MarketingData | TextPageData | SocialData | AppData | PaymentData | Url
+
 
     interface CouponData {
         title: string;
@@ -94,41 +95,15 @@ declare global {
         fallbackUrl: string;
     }
 
-    // --- Payment: type-safe discriminated union ---
-    type PaymentGateway = "paypal" | "stripe" | "upi" | "crypto" | "custom";
-
-    interface PaymentBaseConfig {
-        recipientName: string;
-        amount: string;
-        currency: string;
-    }
-
-    interface PaypalPaymentData {
-        gateway: "paypal";
-        config: PaymentBaseConfig & {
-            paypalHandle: string;
-        };
-    }
-
-    interface StripePaymentData {
-        gateway: "stripe";
-        config: PaymentBaseConfig & {
-            stripeLink: string;
-        };
-    }
+    type PaymentGateway = "upi" | "custom";
 
     interface UpiPaymentData {
         gateway: "upi";
-        config: PaymentBaseConfig & {
+        config: {
             upiId: string;
-        };
-    }
-
-    interface CryptoPaymentData {
-        gateway: "crypto";
-        config: PaymentBaseConfig & {
-            walletAddress: string;
-            network?: string;
+            currency: string;
+            recipientName?: string;
+            amount?: string;
         };
     }
 
@@ -139,12 +114,19 @@ declare global {
         };
     }
 
-    type PaymentData = PaypalPaymentData | StripePaymentData | UpiPaymentData | CryptoPaymentData | CustomPaymentData;
+    type PaymentData = UpiPaymentData | CustomPaymentData;
+
+
     // Exclude: type, width, height, data, nodeCanvas, jsdom, qrOptions
     type QRStyleOptions = Omit<
         QRCodeStylingConfig,
         "type" | "width" | "height" | "data" | "nodeCanvas" | "jsdom" | "qrOptions"
     >;
+
+
+    interface Url {
+        value: string;
+    }
 
     interface QRCodeStyle {
         publicImage: boolean;
@@ -152,9 +134,6 @@ declare global {
         style: QRStyleOptions;
         frame?: unknown;
     }
-
-
-
 
 
 
