@@ -216,52 +216,51 @@ export function QRCreatorShell({ type, data, onDataChange, children, previewSlot
 
                                 /* STEP 1: CONTENT */
                                 <div className="space-y-6">
+                                    <div>
+                                        <h2 className="text-xl font-semibold mb-1">Campaign Details</h2>
+                                        <p className="text-sm text-muted-foreground">Set up your QR code campaign information</p>
+                                    </div>
+
                                     {/* Campaign Details */}
-                                    <div className="space-y-4">
-                                        <div>
-                                            <h2 className="text-xl font-semibold mb-1">Campaign Details</h2>
-                                            <p className="text-sm text-muted-foreground">Set up your QR code campaign information</p>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <Controller
-                                                name="title"
-                                                control={campaignForm.control}
-                                                render={({ field, fieldState }) => (
-                                                    <div className="space-y-2">
-                                                        <Label htmlFor="qr-title">Campaign Name</Label>
-                                                        <Input
-                                                            id="qr-title"
-                                                            value={field.value}
-                                                            onChange={field.onChange}
-                                                            placeholder="Enter campaign name"
-                                                        />
-                                                        {fieldState.error && (
-                                                            <p className="text-sm text-destructive">{fieldState.error.message}</p>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            />
-                                            <Controller
-                                                name="expiresAt"
-                                                control={campaignForm.control}
-                                                render={({ field }) => (
-                                                    <div className="space-y-2">
-                                                        <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
-                                                        <Input
-                                                            id="qr-expiry"
-                                                            type="datetime-local"
-                                                            value={field.value}
-                                                            onChange={field.onChange}
-                                                        />
-                                                        <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
-                                                    </div>
-                                                )}
-                                            />
-                                        </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <Controller
+                                            name="title"
+                                            control={campaignForm.control}
+                                            render={({ field, fieldState }) => (
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="qr-title">Campaign Name</Label>
+                                                    <Input
+                                                        id="qr-title"
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        placeholder="Enter campaign name"
+                                                    />
+                                                    {fieldState.error && (
+                                                        <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        />
+                                        <Controller
+                                            name="expiresAt"
+                                            control={campaignForm.control}
+                                            render={({ field }) => (
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
+                                                    <Input
+                                                        id="qr-expiry"
+                                                        type="datetime-local"
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                    />
+                                                    <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
+                                                </div>
+                                            )}
+                                        />
                                     </div>
 
                                     {/* Category-specific Input Fields (rendered by each page) */}
-
                                     {children}
 
 
