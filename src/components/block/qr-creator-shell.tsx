@@ -29,6 +29,7 @@ interface QRCreatorShellProps {
     data: any;
     onDataChange: (data: any) => void;
     children: React.ReactNode;
+    //For live preview of the page that we are building live
     previewSlot?: React.ReactNode;
     /** Called before handleCreate. Return false to prevent QR creation (e.g. validation failed). */
     onValidate?: () => Promise<boolean> | boolean;
@@ -260,9 +261,9 @@ export function QRCreatorShell({ type, data, onDataChange, children, previewSlot
                                     </div>
 
                                     {/* Category-specific Input Fields (rendered by each page) */}
-                                    <div className="pt-4 border-t">
-                                        {children}
-                                    </div>
+
+                                    {children}
+
 
                                     <Button onClick={handleCreate} className="w-full mt-6" size="lg" disabled={isSaving}>
                                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}

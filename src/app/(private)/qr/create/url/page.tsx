@@ -40,25 +40,27 @@ export default function CreateUrlQR() {
                 onDataChange={(newData) => form.reset(newData)}
                 onValidate={() => form.trigger()}
             >
-                <div className="space-y-2">
-                    <Controller
-                        name="value"
-                        control={form.control}
-                        render={({ field, fieldState }) => (
-                            <div className="space-y-1">
-                                <UtmUrlInput
-                                    value={field.value}
-                                    requireStarStyle={true}
-                                    onChange={(val) => field.onChange(val)}
-                                />
-                                {fieldState.error && (
-                                    <p className="text-sm text-destructive">
-                                        {fieldState.error.message}
-                                    </p>
-                                )}
-                            </div>
-                        )}
-                    />
+                <div className="pt-4 border-t">
+                    <div className="space-y-2">
+                        <Controller
+                            name="value"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <div className="space-y-1">
+                                    <UtmUrlInput
+                                        value={field.value}
+                                        requireStarStyle={true}
+                                        onChange={(val) => field.onChange(val)}
+                                    />
+                                    {fieldState.error && (
+                                        <p className="text-sm text-destructive">
+                                            {fieldState.error.message}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        />
+                    </div>
                 </div>
             </QRCreatorShell>
         </div>

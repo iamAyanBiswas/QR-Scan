@@ -17,7 +17,9 @@ export default function CreateMarketingQR() {
                 onDataChange={setData}
                 previewSlot={<PagePreview type="marketingPage" data={data} />}
             >
-                <PageBuilderForm type="marketingPage" data={data} onChange={setData} />
+                <div className="pt-4 border-t">
+                    <PageBuilderForm type="marketingPage" data={data} onChange={setData} />
+                </div>
             </QRCreatorShell>
         </div>
     );

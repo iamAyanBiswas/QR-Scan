@@ -17,7 +17,9 @@ export default function CreateCouponQR() {
                 onDataChange={setData}
                 previewSlot={<PagePreview type="couponPage" data={data} />}
             >
-                <PageBuilderForm type="couponPage" data={data} onChange={setData} />
+                <div className="pt-4 border-t">
+                    <PageBuilderForm type="couponPage" data={data} onChange={setData} />
+                </div>
             </QRCreatorShell>
         </div>
     );

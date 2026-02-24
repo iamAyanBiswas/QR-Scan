@@ -45,61 +45,63 @@ export default function CreateAppStoreQR() {
                 onDataChange={(newData) => form.reset(newData)}
                 onValidate={() => form.trigger()}
             >
-                <div className="space-y-4 w-full">
-                    <Controller
-                        name="iosUrl"
-                        control={form.control}
-                        render={({ field, fieldState }) => (
-                            <div className="space-y-1">
-                                <IconImageInput
-                                    label="iOS App Store URL"
-                                    placeholder="https://apps.apple.com/..."
-                                    url={appRedirectIconsURL.appstore}
-                                    value={field.value || ""}
-                                    onChange={(e) => field.onChange(e.target.value)}
-                                />
-                                {fieldState.error && (
-                                    <p className="text-sm text-destructive">{fieldState.error.message}</p>
-                                )}
-                            </div>
-                        )}
-                    />
-                    <Controller
-                        name="androidUrl"
-                        control={form.control}
-                        render={({ field, fieldState }) => (
-                            <div className="space-y-1">
-                                <IconImageInput
-                                    label="Google Play Store URL"
-                                    placeholder="https://play.google.com/..."
-                                    url={appRedirectIconsURL.playstore}
-                                    value={field.value || ""}
-                                    onChange={(e) => field.onChange(e.target.value)}
-                                />
-                                {fieldState.error && (
-                                    <p className="text-sm text-destructive">{fieldState.error.message}</p>
-                                )}
-                            </div>
-                        )}
-                    />
-                    <Controller
-                        name="fallbackUrl"
-                        control={form.control}
-                        render={({ field, fieldState }) => (
-                            <div className="space-y-1">
-                                <IconImageInput
-                                    label="Fallback URL (Web)"
-                                    placeholder="https://myapp.com"
-                                    url={appRedirectIconsURL.fallback}
-                                    value={field.value || ""}
-                                    onChange={(e) => field.onChange(e.target.value)}
-                                />
-                                {fieldState.error && (
-                                    <p className="text-sm text-destructive">{fieldState.error.message}</p>
-                                )}
-                            </div>
-                        )}
-                    />
+                <div className="pt-4 border-t">
+                    <div className="space-y-4 w-full">
+                        <Controller
+                            name="iosUrl"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <div className="space-y-1">
+                                    <IconImageInput
+                                        label="iOS App Store URL"
+                                        placeholder="https://apps.apple.com/..."
+                                        url={appRedirectIconsURL.appstore}
+                                        value={field.value || ""}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                    />
+                                    {fieldState.error && (
+                                        <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                    )}
+                                </div>
+                            )}
+                        />
+                        <Controller
+                            name="androidUrl"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <div className="space-y-1">
+                                    <IconImageInput
+                                        label="Google Play Store URL"
+                                        placeholder="https://play.google.com/..."
+                                        url={appRedirectIconsURL.playstore}
+                                        value={field.value || ""}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                    />
+                                    {fieldState.error && (
+                                        <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                    )}
+                                </div>
+                            )}
+                        />
+                        <Controller
+                            name="fallbackUrl"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <div className="space-y-1">
+                                    <IconImageInput
+                                        label="Fallback URL (Web)"
+                                        placeholder="https://myapp.com"
+                                        url={appRedirectIconsURL.fallback}
+                                        value={field.value || ""}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                    />
+                                    {fieldState.error && (
+                                        <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                    )}
+                                </div>
+                            )}
+                        />
+                    </div>
                 </div>
             </QRCreatorShell>
         </div>

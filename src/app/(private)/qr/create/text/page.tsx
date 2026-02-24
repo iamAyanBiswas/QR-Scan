@@ -17,7 +17,9 @@ export default function CreateTextPageQR() {
                 onDataChange={setData}
                 previewSlot={<PagePreview type="textPage" data={data} />}
             >
-                <PageBuilderForm type="textPage" data={data} onChange={setData} />
+                <div className="pt-4 border-t">
+                    <PageBuilderForm type="textPage" data={data} onChange={setData} />
+                </div>
             </QRCreatorShell>
         </div>
     );

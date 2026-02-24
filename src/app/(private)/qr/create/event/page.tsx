@@ -17,7 +17,9 @@ export default function CreateEventQR() {
                 onDataChange={setData}
                 previewSlot={<PagePreview type="eventPage" data={data} />}
             >
-                <PageBuilderForm type="eventPage" data={data} onChange={setData} />
+                <div className="pt-4 border-t">
+                    <PageBuilderForm type="eventPage" data={data} onChange={setData} />
+                </div>
             </QRCreatorShell>
         </div>
     );

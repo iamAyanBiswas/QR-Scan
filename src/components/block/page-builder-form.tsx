@@ -5,7 +5,7 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Ticket, Briefcase, Trash2, Image as ImageIcon, Utensils, Calendar, Megaphone, FileText } from "lucide-react";
+import { Ticket, Briefcase, Trash2, Utensils, Calendar, Megaphone, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QR_PAGE_TITLE } from "@/config/qr-page-builder";
 

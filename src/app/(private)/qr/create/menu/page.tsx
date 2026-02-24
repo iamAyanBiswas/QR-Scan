@@ -17,7 +17,9 @@ export default function CreateMenuQR() {
                 onDataChange={setData}
                 previewSlot={<PagePreview type="menuCard" data={data} />}
             >
-                <PageBuilderForm type="menuCard" data={data} onChange={setData} />
+                <div className="pt-4 border-t">
+                    <PageBuilderForm type="menuCard" data={data} onChange={setData} />
+                </div>
             </QRCreatorShell>
         </div>
     );

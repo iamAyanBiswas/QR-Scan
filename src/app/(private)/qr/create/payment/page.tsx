@@ -89,6 +89,7 @@ export default function CreatePaymentQR() {
                 onDataChange={(newData) => form.reset(newData as PaymentFormValues)}
                 onValidate={() => form.trigger()}
             >
+
                 <div className="space-y-5 w-full">
                     {/* Payment Gateway Selector */}
                     <Controller
