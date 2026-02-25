@@ -1,19 +1,34 @@
 "use client";
-
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
+import { IconImageInput } from "@/components/custom/input";
+
 import { QRCreatorShell } from "@/components/block/qr-creator-shell";
+import { RedirectPreview } from "@/components/block/redirect-preview";
+
+import { createQRCode } from "@/actions/qr-actions";
+
+import { cn } from "@/lib/utils";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { IconImageInput } from "@/components/custom/input";
-import { cn } from "@/lib/utils";
+
 
 const urlRegex = /^(https?:\/\/)(?:(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}|(?:\d{1,3}\.){3}\d{1,3})(:\d+)?(\/.*)?$/i;
 
 // Regex for UPI ID (e.g., name@bank, phone@paytm)
 const upiRegex = /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+$/;
+const campaignSchema = z.object({
+    title: z.string().min(1, "Campaign name is required").max(100, "Length should not more then 100"),
+    expiresAt: z.string().optional(),
+});
 
 const upiSchema = z.object({
     gateway: z.literal("upi"),
@@ -38,6 +53,8 @@ const paymentSchema = z.discriminatedUnion("gateway", [
 ]) satisfies z.ZodType<PaymentData>;
 
 type PaymentFormValues = z.infer<typeof paymentSchema>;
+type CampaignFormValues = z.infer<typeof campaignSchema>;
+
 
 const paymentGateways: { value: PaymentGateway; label: string; icon: string }[] = [
     { value: "upi", label: "UPI", icon: "https://img.icons8.com/color/48/bhim.png" },
@@ -56,6 +73,19 @@ const currencies = [
 ];
 
 export default function CreatePaymentQR() {
+    // Dynamic QR State
+    const [isSaving, setIsSaving] = useState(false);
+    const [shortUrl, setShortUrl] = useState<string | null>(null);
+    const [step, setStep] = useState<1 | 2>(1);
+    const [shortId, setShortId] = useState<string | null>(null);
+
+
+    const campaignForm = useForm<CampaignFormValues>({
+        resolver: zodResolver(campaignSchema),
+        defaultValues: { title: "Untitled QR", expiresAt: "" },
+        mode: "onChange",
+    });
+
     const form = useForm<PaymentFormValues>({
         resolver: zodResolver(paymentSchema),
         defaultValues: { gateway: "custom", config: { url: "" } },
@@ -63,6 +93,8 @@ export default function CreatePaymentQR() {
     });
 
     const data = form.watch();
+    const parsed = paymentSchema.safeParse(data);
+    const normalizedData = parsed.success ? parsed.data : data;
 
     const handleGatewayChange = (gw: PaymentGateway) => {
         if (gw === "upi") {
@@ -78,18 +110,89 @@ export default function CreatePaymentQR() {
         }
     };
 
-    const parsed = paymentSchema.safeParse(data);
-    const normalizedData = parsed.success ? parsed.data : data;
+
+
+    const handleCreate = async () => {
+        // Validate campaign details (title)
+        const campaignValid = await campaignForm.trigger();
+        const formValid = await form.trigger();
+        if (!campaignValid || !formValid) return;
+
+        const { title, expiresAt } = campaignForm.getValues();
+        setIsSaving(true);
+        try {
+
+            // Step 1: Create Draft
+            const result = await createQRCode({
+                title: title || "Untitled QR",
+                type: "payment",
+                dynamicData: data,
+                designStats: {},
+                expiresAt: expiresAt ? new Date(expiresAt) : null,
+            });
+
+            if (result.success && result.id) {
+                setShortId(result.id);
+                const domain = process.env.NEXT_PUBLIC_SHORT_DOMAIN;
+                const finalUrl = `${domain}/${result.id}`;
+                setShortUrl(finalUrl);
+                setStep(2);
+                toast.success("Content saved! Now customize your design.");
+            } else {
+                toast.error(result.error || "Failed to create draft");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Something went wrong");
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
             <QRCreatorShell
-                type="payment"
-                data={normalizedData}
-                onDataChange={(newData) => form.reset(newData as PaymentFormValues)}
-                onValidate={() => form.trigger()}
+                step={step}
+                shortId={shortId}
+                shortUrl={shortUrl}
+                previewSlot={<RedirectPreview type="payment" data={normalizedData} />}
             >
-
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Controller
+                        name="title"
+                        control={campaignForm.control}
+                        render={({ field, fieldState }) => (
+                            <div className="space-y-2">
+                                <Label htmlFor="qr-title">Campaign Name</Label>
+                                <Input
+                                    id="qr-title"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="Enter campaign name"
+                                />
+                                {fieldState.error && (
+                                    <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                )}
+                            </div>
+                        )}
+                    />
+                    <Controller
+                        name="expiresAt"
+                        control={campaignForm.control}
+                        render={({ field }) => (
+                            <div className="space-y-2">
+                                <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
+                                <Input
+                                    id="qr-expiry"
+                                    type="datetime-local"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                />
+                                <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
+                            </div>
+                        )}
+                    />
+                </div>
                 <div className="space-y-5 w-full">
                     {/* Payment Gateway Selector */}
                     <Controller
@@ -197,6 +300,7 @@ export default function CreatePaymentQR() {
                                             url="https://img.icons8.com/color/48/bhim.png"
                                             value={field.value || ""}
                                             onChange={(e) => field.onChange(e.target.value)}
+                                            requireStarStyle={true}
                                         />
                                         {fieldState.error && <p className="text-sm text-destructive">{fieldState.error.message}</p>}
                                     </div>
@@ -217,6 +321,7 @@ export default function CreatePaymentQR() {
                                         url="https://img.icons8.com/pulsar-gradient/48/external-link.png"
                                         value={field.value || ""}
                                         onChange={(e) => field.onChange(e.target.value)}
+                                        requireStarStyle={true}
                                     />
                                     {fieldState.error && <p className="text-sm text-destructive">{fieldState.error.message}</p>}
                                 </div>
@@ -224,6 +329,10 @@ export default function CreatePaymentQR() {
                         />
                     )}
                 </div>
+                <Button onClick={handleCreate} className="w-full mt-6" size="lg" disabled={isSaving}>
+                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                    Create QR
+                </Button>
             </QRCreatorShell>
         </div>
     );

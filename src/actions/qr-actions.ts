@@ -12,7 +12,7 @@ import { headers } from "next/headers";
 
 export async function createQRCode(data: {
     title: string;
-    type: string;
+    type: QRType;
     dynamicData: any;
     designStats: any;
     scanLimit?: number;

@@ -9,6 +9,7 @@ export interface IconImageInputProps extends Omit<React.ComponentProps<"input">,
     label: string
     iconClassName?: string;
     containerClassName?: string;
+    requireStarStyle?: boolean
 }
 
 export function IconImageInput({
@@ -19,11 +20,12 @@ export function IconImageInput({
     iconClassName,
     containerClassName,
     className,
+    requireStarStyle = false,
     ...props
 }: IconImageInputProps) {
     return (
         <div className="space-y-2">
-            <Label htmlFor={name}>{label}</Label>
+            <Label htmlFor={name}>{label}{requireStarStyle && <span className="text-red-600 text-lg">*</span>}</Label>
 
             <div className={cn(
                 "relative flex items-center w-full",

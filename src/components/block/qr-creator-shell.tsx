@@ -3,51 +3,36 @@
 import React, { useEffect, useRef, useState } from "react";
 import QRCodeStyling, { FileExtension, Options as QRCodeOptions } from "qr-code-styling";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2, Link as LinkIcon, Smartphone } from "lucide-react";
-import { createQRCode, updateQRCode } from "@/actions/qr-actions";
+import { updateQRCode } from "@/actions/qr-actions";
 import { getUploadUrl } from "@/actions/upload-actions";
 import { toast } from "sonner";
 import { StepIndicator } from "@/components/custom/step-indicator";
 import { QRStylingConfig } from "@/components/block/qr-styling-config";
 import { useQrStyleStore } from "@/store/qr-style-store";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 
-const campaignSchema = z.object({
-    title: z.string().min(1, "Campaign name is required").max(100, "Length should not more then 100"),
-    expiresAt: z.string().optional(),
-});
 
-type CampaignFormValues = z.infer<typeof campaignSchema>;
+
 
 interface QRCreatorShellProps {
-    type: QRType;
-    data: any;
-    onDataChange: (data: any) => void;
     children: React.ReactNode;
+    shortId: string | null;
+    step: 1 | 2
+    shortUrl: string | null;
     //For live preview of the page that we are building live
     previewSlot?: React.ReactNode;
-    /** Called before handleCreate. Return false to prevent QR creation (e.g. validation failed). */
-    onValidate?: () => Promise<boolean> | boolean;
 }
 
-export function QRCreatorShell({ type, data, onDataChange, children, previewSlot, onValidate }: QRCreatorShellProps) {
-    const campaignForm = useForm<CampaignFormValues>({
-        resolver: zodResolver(campaignSchema),
-        defaultValues: { title: "Untitled QR", expiresAt: "" },
-        mode: "onChange",
-    });
+export function QRCreatorShell({ children, shortId, step, shortUrl, previewSlot }: QRCreatorShellProps) {
+
     const { qrCodeStyle, logoFile, setQrCodeStyle, setLogoFile } = useQrStyleStore();
 
     // Dynamic QR State
     const [isSaving, setIsSaving] = useState(false);
-    const [shortUrl, setShortUrl] = useState<string | null>(null);
-    const [step, setStep] = useState<1 | 2>(1);
-    const [shortId, setShortId] = useState<string | null>(null);
+    // const [shortUrl, setShortUrl] = useState<string | null>(null);
+    // const [step, setStep] = useState<1 | 2>(1);
+    // const [shortId, setShortId] = useState<string | null>(null);
 
     const qrCodeRef = useRef<QRCodeStyling | null>(null);
 
@@ -92,48 +77,8 @@ export function QRCreatorShell({ type, data, onDataChange, children, previewSlot
         }
     };
 
-    const handleCreate = async () => {
-        // Validate campaign details (title)
-        const campaignValid = await campaignForm.trigger();
-        // Run category-specific validation (e.g. react-hook-form) if provided
-        const categoryValid = onValidate ? await onValidate() : true;
-        if (!campaignValid || !categoryValid) return;
 
-        const { title, expiresAt } = campaignForm.getValues();
-        setIsSaving(true);
-        try {
-            // Prepare dynamic data
-            let dynamicPayload: any = { ...data };
-            if (type === "url" && data.value && !data.value.startsWith("http")) {
-                dynamicPayload.value = `https://${data.value}`;
-            }
 
-            // Step 1: Create Draft
-            const result = await createQRCode({
-                title: title || "Untitled QR",
-                type: type,
-                dynamicData: dynamicPayload,
-                designStats: qrCodeStyle,
-                expiresAt: expiresAt ? new Date(expiresAt) : null,
-            });
-
-            if (result.success && result.id) {
-                setShortId(result.id);
-                const domain = process.env.NEXT_PUBLIC_SHORT_DOMAIN;
-                const finalUrl = `${domain}/${result.id}`;
-                setShortUrl(finalUrl);
-                setStep(2);
-                toast.success("Content saved! Now customize your design.");
-            } else {
-                toast.error(result.error || "Failed to create draft");
-            }
-        } catch (error) {
-            console.error(error);
-            toast.error("Something went wrong");
-        } finally {
-            setIsSaving(false);
-        }
-    };
 
     const handleFinalSave = async () => {
         if (!shortId) return;
@@ -221,53 +166,9 @@ export function QRCreatorShell({ type, data, onDataChange, children, previewSlot
                                         <p className="text-sm text-muted-foreground">Set up your QR code campaign information</p>
                                     </div>
 
-                                    {/* Campaign Details */}
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <Controller
-                                            name="title"
-                                            control={campaignForm.control}
-                                            render={({ field, fieldState }) => (
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="qr-title">Campaign Name</Label>
-                                                    <Input
-                                                        id="qr-title"
-                                                        value={field.value}
-                                                        onChange={field.onChange}
-                                                        placeholder="Enter campaign name"
-                                                    />
-                                                    {fieldState.error && (
-                                                        <p className="text-sm text-destructive">{fieldState.error.message}</p>
-                                                    )}
-                                                </div>
-                                            )}
-                                        />
-                                        <Controller
-                                            name="expiresAt"
-                                            control={campaignForm.control}
-                                            render={({ field }) => (
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
-                                                    <Input
-                                                        id="qr-expiry"
-                                                        type="datetime-local"
-                                                        value={field.value}
-                                                        onChange={field.onChange}
-                                                    />
-                                                    <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
-                                                </div>
-                                            )}
-                                        />
-                                    </div>
-
                                     {/* Category-specific Input Fields (rendered by each page) */}
                                     {children}
 
-
-                                    <Button onClick={handleCreate} className="w-full mt-6" size="lg" disabled={isSaving}>
-                                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                        Next Step →
-                                    </Button>
                                 </div>
                             ) : (
 
@@ -292,26 +193,8 @@ export function QRCreatorShell({ type, data, onDataChange, children, previewSlot
                         {step === 1 ?
                             (<Card className="border-none shadow-none py-0 bg-transparent">
                                 <CardContent>
-                                    {/* Custom preview slot OR default placeholder */}
-                                    {previewSlot ? previewSlot : (
-                                        <div className="flex flex-col items-center justify-center h-96 border-2 border-dashed rounded-xl bg-muted/30">
-                                            <div className="text-center text-muted-foreground p-6">
-                                                <Smartphone className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                                                <h3 className="text-lg font-semibold mb-2">Live Preview</h3>
-                                                <p className="text-sm max-w-xs mx-auto">
-                                                    Enter your content and click &quot;Next&quot; to generate your dynamic QR code.
-
-                                                    {/* Show Redirect preview only for url */}
-                                                    {type === "url" && data.value && (
-                                                        <span className="block mt-4 p-2 bg-background border rounded text-xs break-all">
-                                                            Redirects to: <br />
-                                                            <span className="text-primary">{data.value}</span>
-                                                        </span>
-                                                    )}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
+                                    {/* Custom preview slot */}
+                                    {previewSlot && previewSlot}
                                 </CardContent>
                             </Card>)
                             :
