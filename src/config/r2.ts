@@ -1,0 +1,1 @@
+export const MAX_R2_UPLOAD_LIMIT = 5

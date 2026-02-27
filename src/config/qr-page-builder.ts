@@ -28,7 +28,7 @@ export const DEFAULT_BUSINESS_CARD: BusinessCardData = {
     website: "https://example.com",
     bio: "Passionate about building great software.",
     themeColor: "#000000",
-    avatar: "https://github.com/shadcn.png"
+    image: { publicImage: true, link: "" }
 };
 
 

@@ -1,7 +1,7 @@
 'use client'
 import React from 'react';
 import { Mail, Phone, Globe, Linkedin, Twitter, Instagram, MapPin, User, Download } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { RendererAvatar, RendererAvatarFallback, RendererAvatarImage } from "@/components/renderer/ui/avatar";
 import { RendererButton } from '@/components/renderer/ui/button';
 
 export default function BusinessCardTemplate({ data }: { data: BusinessCardData }) {
@@ -38,50 +38,67 @@ END:VCARD`;
                     style={{ backgroundColor: data.themeColor || '#000' }}
                 >
                     <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 p-1 bg-whit rounded-full">
-                        <Avatar className="w-24 h-24 border-4 border-white">
-                            <AvatarImage src={data.avatar} className="object-cover" />
-                            <AvatarFallback>{data.fullName.slice(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
+                        <RendererAvatar className="w-24 h-24 border-4 border-white">
+                            <RendererAvatarImage src={data.image?.link} className="object-cover" />
+                            <RendererAvatarFallback>{data.fullName.slice(0, 2).toUpperCase()}</RendererAvatarFallback>
+                        </RendererAvatar>
                     </div>
                 </div>
 
                 {/* Profile Info */}
-                <div className="pt-16 pb-8 px-6 text-center space-y-2">
+                <div className="pt-16 pb-8 px-2 text-center space-y-2">
                     <h1 className="text-2xl font-bold text-gray-900">{data.fullName}</h1>
                     <p className="text-sm font-medium text-gray-700 uppercase tracking-wide">{data.title}</p>
                     <p className="text-sm text-gray-500 font-medium">{data.company}</p>
 
                     {data.bio && (
-                        <p className="text-sm text-gray-600 mt-4 leading-relaxed px-2">
-                            {data.bio}
-                        </p>
+                        <div className='mt-4'>
+                            <p className='text-[16px] text-gray-700'>Bio</p>
+                            <p className="text-sm text-gray-600 leading-relaxed px-2">
+                                {data.bio}
+                            </p>
+                        </div>
+
                     )}
                 </div>
 
+                {
+                    data.address && (
+                        <div className='text-gray-600 px-4 pb-4 text-sm flex justify-start gap-1'>
+                            <div className="flex items-start justify-start text-custom-relative-theme hover:text-custom-theme">
+                                <MapPin className="w-5 h-5" />
+                            </div>
+                            <p>{data.address}</p>
+                        </div>
+                    )}
+
                 {/* Contact Links */}
                 <div className="px-6 pb-8 space-y-4">
-                    <div className="grid grid-cols-4 gap-2 mb-6">
+                    <div className="flex justify-center gap-4">
                         {data.email && (
-                            <a href={`mailto:${data.email}`} className="flex items-center justify-center w-full aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
+                            <a href={`mailto:${data.email}`} className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <Mail className="w-5 h-5" />
                             </a>
                         )}
                         {data.phone && (
-                            <a href={`tel:${data.phone}`} className="flex items-center justify-center w-full aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
+                            <a href={`tel:${data.phone}`} className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <Phone className="w-5 h-5" />
                             </a>
                         )}
                         {data.website && (
-                            <a href={data.website} target="_blank" className="flex items-center justify-center w-full aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
+                            <a href={data.website} target="_blank" className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <Globe className="w-5 h-5" />
                             </a>
                         )}
-                        {data.address && (
-                            <a href={`https://maps.google.com/?q=${data.address}`} target="_blank" className="flex items-center justify-center w-full aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
+                        {/* {data.address && (
+                            <a href={`https://maps.google.com/?q=${data.address}`} target="_blank" className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <MapPin className="w-5 h-5" />
                             </a>
-                        )}
+                        )} */}
                     </div>
+
+
+
 
                     {/* Socials */}
                     <div className="flex justify-center gap-4 text-gray-400">

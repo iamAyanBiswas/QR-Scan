@@ -22,16 +22,16 @@ declare global {
 
     interface BusinessCardData {
         fullName: string;
-        title: string;
-        company: string;
-        email: string;
-        phone: string;
-        website: string;
-        bio: string;
-        avatar?: string;
-        linkedin?: string;
-        twitter?: string;
-        instagram?: string;
+        title?: string;
+        company?: string;
+        email?: string;
+        phone?: string;
+        website?: string; //link
+        bio?: string;
+        image?: { publicImage: boolean, link: string };
+        linkedin?: string; //link
+        twitter?: string;  //link
+        instagram?: string; //link
         address?: string;
         themeColor: string;
     }
