@@ -4,7 +4,6 @@ import CouponTemplate from '@/components/renderer/templates/coupon-template';
 import BusinessCardTemplate from '@/components/renderer/templates/business-card-template';
 import MenuTemplate from '@/components/renderer/templates/menu-template';
 import EventTemplate from '@/components/renderer/templates/event-template';
-import MarketingTemplate from '@/components/renderer/templates/marketing-template';
 import TextTemplate from '@/components/renderer/templates/text-template';
 import { AlertTriangle } from 'lucide-react';
 
@@ -38,9 +37,6 @@ export default function DynamicPageRenderer({ type, data }: DynamicRendererProps
 
         case "eventPage":
             return <EventTemplate data={data as EventPageData} />;
-
-        case "marketingPage":
-            return <MarketingTemplate data={data as MarketingData} />;
 
         case "textPage":
             return <TextTemplate data={data as TextPageData} />;

@@ -18,7 +18,7 @@ export default function CouponTemplate({ data }: { data: CouponData }) {
                 <div className="relative h-48">
                     {data.heroImage ? (
                         <img
-                            src={data.heroImage}
+                            src={data.heroImage?.link}
                             alt="Offer"
                             className="w-full h-full object-cover"
                         />
@@ -27,9 +27,13 @@ export default function CouponTemplate({ data }: { data: CouponData }) {
                             <Ticket className="w-16 h-16 text-custom-relative-theme" />
                         </div>
                     )}
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur text-black px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                        {data.discountValue}
-                    </div>
+                    {
+                        data.discountValue && (
+                            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur text-black px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                                {data.discountValue}
+                            </div>
+                        )
+                    }
                 </div>
 
                 {/* Content */}

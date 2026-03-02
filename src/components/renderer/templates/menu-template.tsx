@@ -6,12 +6,13 @@ export default function MenuTemplate({ data }: { data: MenuData }) {
     if (!data) return null;
     const theme = data.themeColor || '#ea580c'
 
+
     return (
         <div className="min-h-screen bg-white text-black pb-12" style={{ "--custom-theme": theme } as React.CSSProperties}>
             {/* Header */}
             <div className="p-6 text-center space-y-4 bg-custom-theme">
                 {data.logo && (
-                    <img src={data.logo} alt="Logo" className="w-24 h-24 rounded-full mx-auto border-4 border-white object-cover" />
+                    <img src={data.logo?.link} alt="Logo" className="w-24 h-24 rounded-full mx-auto border-4 border-white object-cover" />
                 )}
                 <h1 className="text-3xl font-bold text-white">{data.restaurantName || "Restaurant Name"}</h1>
             </div>
@@ -31,7 +32,7 @@ export default function MenuTemplate({ data }: { data: MenuData }) {
                                         <p className="text-sm text-black/60">{item.description}</p>
                                     </div>
                                     <div className="font-bold whitespace-nowrap text-custom-theme">
-                                        {data.currency}{item.price}
+                                        {item.price && data.currency}{item.price}
                                     </div>
                                 </div>
                             ))}

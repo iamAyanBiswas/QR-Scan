@@ -21,7 +21,6 @@ const qrCategories = [
             { href: "/qr/create/coupon", icon: Ticket, label: "Coupon", description: "Discount codes" },
             { href: "/qr/create/menu", icon: Utensils, label: "Menu", description: "Restaurant menu" },
             { href: "/qr/create/event", icon: Calendar, label: "Event", description: "Event details" },
-            { href: "/qr/create/marketing", icon: Megaphone, label: "Marketing", description: "Landing page" },
             { href: "/qr/create/text", icon: FileText, label: "Text Page", description: "Rich text content" },
         ],
     },

@@ -3,7 +3,6 @@ import CouponTemplate from "@/components/renderer/templates/coupon-template";
 import BusinessCardTemplate from "@/components/renderer/templates/business-card-template";
 import MenuTemplate from "@/components/renderer/templates/menu-template";
 import EventTemplate from "@/components/renderer/templates/event-template";
-import MarketingTemplate from "@/components/renderer/templates/marketing-template";
 import TextTemplate from "@/components/renderer/templates/text-template";
 
 interface PagePreviewProps {
@@ -20,7 +19,6 @@ export function PagePreview({ type, data }: PagePreviewProps) {
                 {type === "businessCard" && <div className="origin-top w-full"><BusinessCardTemplate data={data as BusinessCardData} /></div>}
                 {type === "menuCard" && <div className="origin-top w-full min-h-full"><MenuTemplate data={data as MenuData} /></div>}
                 {type === "eventPage" && <div className="origin-top w-full min-h-full"><EventTemplate data={data as EventPageData} /></div>}
-                {type === "marketingPage" && <div className="origin-top w-full min-h-full"><MarketingTemplate data={data as MarketingData} /></div>}
                 {type === "textPage" && <div className="origin-top w-full min-h-full"><TextTemplate data={data as TextPageData} /></div>}
             </div>
         </div>

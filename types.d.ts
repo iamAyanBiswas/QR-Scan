@@ -1,20 +1,20 @@
 import type { Options as QRCodeStylingConfig } from "qr-code-styling"
 declare global {
     type QrRedirectType = "url" | "app" | "payment"
-    type QrPageType = "couponPage" | "businessCard" | "menuCard" | "eventPage" | "marketingPage" | "textPage"
+    type QrPageType = "couponPage" | "businessCard" | "menuCard" | "eventPage" | "textPage"
     type QRType = QrPageType | QrRedirectType
 
-    type DynamicPageData = CouponData | BusinessCardData | MenuData | EventPageData | MarketingData | TextPageData | SocialData | AppData | PaymentData | Url
+    type DynamicPageData = CouponData | BusinessCardData | MenuData | EventPageData | TextPageData | SocialData | AppData | PaymentData | Url
 
 
     interface CouponData {
         title: string;
         discountCode: string;
-        discountValue: string; // "50% OFF"
-        description: string;
-        expiryDate: string;
-        terms: string;
-        heroImage?: string; // Base64 or URL
+        discountValue?: string; // "50% OFF"
+        description?: string;
+        expiryDate?: string;
+        terms?: string;
+        heroImage?: { publicImage: boolean, link: string };
         websiteUrl?: string;
         buttonText?: string;
         themeColor: string;
@@ -39,16 +39,14 @@ declare global {
 
     interface MenuData {
         restaurantName: string;
-        logo?: string;
+        logo?: { publicImage: boolean, link: string };
         currency: string;
         sections: {
             title: string;
             items: {
                 name: string;
                 description?: string;
-                price: string;
-                image?: string;
-                allergens?: string[];
+                price?: string;
             }[];
         }[];
         themeColor: string;
@@ -60,20 +58,10 @@ declare global {
         endDate: string;
         location: string;
         description: string;
-        heroImage?: string;
+        heroImage?: { publicImage: boolean, link: string };
         organizer: string;
         agenda?: { time: string; activity: string }[];
         registrationUrl?: string;
-        themeColor: string;
-    }
-
-    interface MarketingData {
-        headline: string;
-        subheadline?: string;
-        heroImage?: string;
-        bodyText: string;
-        ctaIdentifier: string;
-        ctaUrl: string;
         themeColor: string;
     }
 
