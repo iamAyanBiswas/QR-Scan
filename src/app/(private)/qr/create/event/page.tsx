@@ -5,7 +5,7 @@ import { QRCreatorShell } from "@/components/block/qr-creator-shell";
 import { PagePreview } from "@/components/block/page-preview";
 import { DEFAULT_EVENT_PAGE, QR_PAGE_TITLE } from "@/config/qr-page-builder";
 import { z } from "zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { createQRCode } from "@/actions/qr-actions";
@@ -22,8 +22,30 @@ const campaignSchema = z.object({
 });
 
 const formSchema = z.object({
-    //schema
-}) //satisfies z.ZodType<EventPageData>
+    title: z.string().min(1, "Event title is required").max(150, "Title must be under 150 characters"),
+    startDate: z.string().min(1, "Start date is required"),
+    endDate: z.string().optional(),
+    location: z.string().optional(),
+    description: z.string().max(1000, "Description must be under 1000 characters").optional(),
+    organizer: z.string().optional(),
+    themeColor: z.string().min(1, "Theme color is required"),
+    agenda: z.array(z.object({
+        time: z.string().min(1, "Time is required"),
+        activity: z.string().min(1, "Activity is required"),
+    })).optional(),
+    buttonConfig: z.object({
+        buttontext: z.string().optional(),
+        url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+    }).optional(),
+}).superRefine((data, ctx) => {
+    if (data.endDate && data.startDate && data.endDate < data.startDate) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "End date must be after start date",
+            path: ["endDate"],
+        });
+    }
+}) satisfies z.ZodType<Omit<EventPageData, "heroImage">>;
 
 type CampaignFormValues = z.infer<typeof campaignSchema>;
 type FormValues = z.infer<typeof formSchema>;
@@ -35,7 +57,8 @@ export default function CreateEventQR() {
     const [shortUrl, setShortUrl] = useState<string | null>(null);
     const [step, setStep] = useState<1 | 2>(1);
     const [shortId, setShortId] = useState<string | null>(null);
-    const [heroImageFile, setHeroImageFile] = useState<File | null>(null)
+    const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
+    const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null);
 
 
     const campaignForm = useForm<CampaignFormValues>({
@@ -44,22 +67,46 @@ export default function CreateEventQR() {
         mode: "onChange",
     });
 
-
-
     const form = useForm<FormValues>({
-        //add here
-    })
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            title: DEFAULT_EVENT_PAGE.title,
+            startDate: DEFAULT_EVENT_PAGE.startDate,
+            endDate: DEFAULT_EVENT_PAGE.endDate ?? "",
+            location: DEFAULT_EVENT_PAGE.location ?? "",
+            description: DEFAULT_EVENT_PAGE.description ?? "",
+            organizer: DEFAULT_EVENT_PAGE.organizer ?? "",
+            themeColor: DEFAULT_EVENT_PAGE.themeColor,
+            agenda: DEFAULT_EVENT_PAGE.agenda ?? [],
+            buttonConfig: {
+                buttontext: DEFAULT_EVENT_PAGE.buttonConfig?.buttontext ?? "",
+                url: DEFAULT_EVENT_PAGE.buttonConfig?.url ?? "",
+            },
+        },
+        mode: "onChange",
+    });
 
-    const [data, setData] = useState<EventPageData>(DEFAULT_EVENT_PAGE);
+    const { fields: agendaFields, append: appendAgenda, remove: removeAgenda } = useFieldArray({
+        control: form.control,
+        name: "agenda",
+    });
 
+    // Watch all form values for the live preview
+    const watchedValues = form.watch();
+    const previewData: EventPageData = {
+        ...watchedValues,
+        heroImage: heroImagePreview
+            ? { publicImage: false, link: heroImagePreview }
+            : DEFAULT_EVENT_PAGE.heroImage,
+    };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setHeroImageFile(file)
+            setHeroImageFile(file);
             const reader = new FileReader();
             reader.onload = () => {
-                setData((prev) => ({ ...prev, heroImage: { publicImage: false, link: reader.result as string } }))
+                setHeroImagePreview(reader.result as string);
             };
             reader.readAsDataURL(file);
         }
@@ -68,23 +115,29 @@ export default function CreateEventQR() {
     const handleCreate = async () => {
         // Validate campaign details (title)
         const campaignValid = await campaignForm.trigger();
-        // const formValid = await form.trigger();
-        // if (!campaignValid || !form) return;
+        const formValid = await form.trigger();
+        if (!campaignValid || !formValid) return;
 
         const { title, expiresAt } = campaignForm.getValues();
+        const formValues = form.getValues();
         setIsSaving(true);
         try {
-            let dynamicData = { ...data }
+            let dynamicData: EventPageData = {
+                ...formValues,
+                heroImage: heroImagePreview
+                    ? { publicImage: false, link: heroImagePreview }
+                    : undefined,
+            };
 
             if (heroImageFile) {
-                const upload = await imageUploadInR2(heroImageFile)
+                const upload = await imageUploadInR2(heroImageFile);
                 if (upload.success) {
                     dynamicData = {
                         ...dynamicData, heroImage: { publicImage: false, link: upload.key }
-                    }
+                    };
                 }
                 else {
-                    toast.error(upload.message as string)
+                    toast.error(upload.message as string);
                 }
             }
             // Step 1: Create Draft
@@ -120,7 +173,7 @@ export default function CreateEventQR() {
                 step={step}
                 shortId={shortId}
                 shortUrl={shortUrl}
-                previewSlot={<PagePreview type="eventPage" data={data} />}
+                previewSlot={<PagePreview type="eventPage" data={previewData} />}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Controller
@@ -167,96 +220,175 @@ export default function CreateEventQR() {
                     </div>
 
                     <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Event Title</Label>
-                            <Input value={data.title || ""} onChange={(e) => setData((prev) => ({ ...prev, title: e.target.value }))} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Host</Label>
-                            <Input value={data.organizer || ""} onChange={(e) => setData((prev) => ({ ...prev, organizer: e.target.value }))} />
-                        </div>
+                        <Controller
+                            name="title"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <div className="space-y-2">
+                                    <Label>Event Title</Label>
+                                    <Input {...field} />
+                                    {fieldState.error && (
+                                        <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                    )}
+                                </div>
+                            )}
+                        />
+                        <Controller
+                            name="organizer"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <div className="space-y-2">
+                                    <Label>Host</Label>
+                                    <Input {...field} />
+                                    {fieldState.error && (
+                                        <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                    )}
+                                </div>
+                            )}
+                        />
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Start</Label>
-                                <Input type="datetime-local" value={data.startDate || ""} onChange={(e) => setData((prev) => ({ ...prev, startDate: e.target.value }))} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>End</Label>
-                                <Input type="datetime-local" value={data.endDate || ""} onChange={(e) => setData((prev) => ({ ...prev, endDate: e.target.value }))} />
-                            </div>
+                            <Controller
+                                name="startDate"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <div className="space-y-2">
+                                        <Label>Start</Label>
+                                        <Input type="datetime-local" {...field} />
+                                        {fieldState.error && (
+                                            <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                        )}
+                                    </div>
+                                )}
+                            />
+                            <Controller
+                                name="endDate"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <div className="space-y-2">
+                                        <Label>End</Label>
+                                        <Input type="datetime-local" {...field} />
+                                        {fieldState.error && (
+                                            <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                        )}
+                                    </div>
+                                )}
+                            />
                         </div>
-                        <div className="space-y-2">
-                            <Label>Location</Label>
-                            <Input value={data.location || ""} onChange={(e) => setData((prev) => ({ ...prev, location: e.target.value }))} />
-                        </div>
+                        <Controller
+                            name="location"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <div className="space-y-2">
+                                    <Label>Location</Label>
+                                    <Input {...field} />
+                                    {fieldState.error && (
+                                        <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                    )}
+                                </div>
+                            )}
+                        />
                         <div className="space-y-2">
                             <Label>Hero Image</Label>
-                            <Input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, "heroImage")} />
+                            <Input type="file" accept="image/*" onChange={handleImageUpload} />
                         </div>
-                        <div className="space-y-2">
-                            <Label>Description</Label>
-                            <Textarea value={data.description || ""} onChange={(e) => setData((prev) => ({ ...prev, description: e.target.value }))} rows={3} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Theme Color</Label>
-                            <div className="flex gap-2">
-                                <Input type="color" className="w-12 h-10 p-1" value={data.themeColor ?? "#2563eb"} onChange={(e) => setData((prev) => ({ ...prev, themeColor: e.target.value }))} />
-                                <Input value={data.themeColor ?? ""} onChange={(e) => setData((prev) => ({ ...prev, themeColor: e.target.value }))} />
-                            </div>
-                        </div>
+                        <Controller
+                            name="description"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <div className="space-y-2">
+                                    <Label>Description</Label>
+                                    <Textarea {...field} rows={3} />
+                                    {fieldState.error && (
+                                        <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                    )}
+                                </div>
+                            )}
+                        />
+                        <Controller
+                            name="themeColor"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <div className="space-y-2">
+                                    <Label>Theme Color</Label>
+                                    <div className="flex gap-2">
+                                        <Input type="color" className="w-12 h-10 p-1" value={field.value} onChange={field.onChange} />
+                                        <Input value={field.value} onChange={field.onChange} />
+                                    </div>
+                                    {fieldState.error && (
+                                        <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                    )}
+                                </div>
+                            )}
+                        />
                         <div className="space-y-4 border-t pt-4">
                             <div className="flex justify-between items-center">
                                 <Label>Agenda / Schedule</Label>
                                 <Button size="sm" variant="outline" onClick={(e) => {
                                     e.preventDefault();
-                                    const newAgenda = [...(data.agenda ?? []), { time: "", activity: "" }];
-                                    setData((prev) => ({ ...prev, agenda: newAgenda }));
+                                    appendAgenda({ time: "", activity: "" });
                                 }}>+ Add Slot</Button>
                             </div>
-                            {(data.agenda || []).map((slot: any, idx: number) => (
-                                <div key={idx} className="flex gap-2 items-center">
-                                    <Input type="time" className="w-32" value={slot.time ?? ""} onChange={(e) => {
-                                        const newAgenda = [...(data.agenda ?? [])];
-                                        newAgenda[idx].time = e.target.value;
-                                        setData((prev) => ({ ...prev, agenda: newAgenda }));
-                                    }} />
-                                    <Input className="flex-1" placeholder="Activity" value={slot.activity ?? ""} onChange={(e) => {
-                                        const newAgenda = [...(data.agenda ?? [])];
-                                        newAgenda[idx].activity = e.target.value;
-                                        setData((prev) => ({ ...prev, agenda: newAgenda }));
-                                    }} />
+                            {agendaFields.map((field, idx) => (
+                                <div key={field.id} className="flex gap-2 items-start">
+                                    <Controller
+                                        name={`agenda.${idx}.time`}
+                                        control={form.control}
+                                        render={({ field: timeField, fieldState }) => (
+                                            <div>
+                                                <Input type="time" className="w-32" {...timeField} />
+                                                {fieldState.error && (
+                                                    <p className="text-xs text-destructive mt-1">{fieldState.error.message}</p>
+                                                )}
+                                            </div>
+                                        )}
+                                    />
+                                    <Controller
+                                        name={`agenda.${idx}.activity`}
+                                        control={form.control}
+                                        render={({ field: activityField, fieldState }) => (
+                                            <div className="flex-1">
+                                                <Input placeholder="Activity" {...activityField} />
+                                                {fieldState.error && (
+                                                    <p className="text-xs text-destructive mt-1">{fieldState.error.message}</p>
+                                                )}
+                                            </div>
+                                        )}
+                                    />
                                     <Button variant="ghost" size="icon" onClick={(e) => {
                                         e.preventDefault();
-                                        const newAgenda = (data.agenda ?? []).filter((_: any, i: number) => i !== idx);
-                                        setData((prev) => ({ ...prev, agenda: newAgenda }));
+                                        removeAgenda(idx);
                                     }}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                                 </div>
                             ))}
                         </div>
 
-
-
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Button Name</Label>
-                                <Input type="text" value={data.buttonConfig?.buttontext || ""} onChange={(e) => setData(prev => ({
-                                    ...prev,
-                                    buttonConfig: {
-                                        ...prev.buttonConfig,
-                                        buttontext: e.target.value,
-                                    }
-                                }))} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Button Redirect URL</Label>
-                                <Input type="text" value={data.buttonConfig?.url || ""} onChange={(e) => setData((prev) => ({
-                                    ...prev,
-                                    buttonConfig: {
-                                        ...prev.buttonConfig,
-                                        url: e.target.value
-                                    }
-                                }))} />
-                            </div>
+                            <Controller
+                                name="buttonConfig.buttontext"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <div className="space-y-2">
+                                        <Label>Button Name</Label>
+                                        <Input type="text" {...field} />
+                                        {fieldState.error && (
+                                            <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                        )}
+                                    </div>
+                                )}
+                            />
+                            <Controller
+                                name="buttonConfig.url"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <div className="space-y-2">
+                                        <Label>Button Redirect URL</Label>
+                                        <Input type="text" {...field} />
+                                        {fieldState.error && (
+                                            <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                                        )}
+                                    </div>
+                                )}
+                            />
                         </div>
 
 
