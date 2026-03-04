@@ -1,10 +1,18 @@
 'use client'
 import React from "react";
-import { Calendar, Clock, MapPin, User, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Calendar, Clock, MapPin, User } from "lucide-react";
 import { RendererButton } from "@/components/renderer/ui/button";
+
 
 export default function EventTemplate({ data }: { data: EventPageData }) {
     if (!data) return null;
+    const go = useRouter()
+    const handleRedirect = () => {
+        if (data.buttonConfig && data.buttonConfig.url) {
+            data.buttonConfig.url.startsWith("http") ? go.push(data.buttonConfig.url) : go.push(`https://${data.buttonConfig.url}`)
+        }
+    }
 
     const theme = data.themeColor || "#2563eb"
 
@@ -78,10 +86,17 @@ export default function EventTemplate({ data }: { data: EventPageData }) {
                         </div>
                     </div>
                 )}
-
-                <RendererButton className="w-full font-bold bg-custom-theme hover:bg-custom-theme/90" size="lg">
-                    Register Now <ArrowRight className="w-4 h-4 ml-2" />
-                </RendererButton>
+                {
+                    (data.buttonConfig?.buttontext || data.buttonConfig?.url) && (
+                        <RendererButton
+                            className="w-full font-bold bg-custom-theme hover:bg-custom-theme/90"
+                            size="lg"
+                            onClick={handleRedirect}
+                        >
+                            {data.buttonConfig?.buttontext ?? "Click Here"}
+                        </RendererButton>
+                    )
+                }
             </div>
         </div>
     );

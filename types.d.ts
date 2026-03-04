@@ -55,13 +55,13 @@ declare global {
     interface EventPageData {
         title: string;
         startDate: string;
-        endDate: string;
-        location: string;
-        description: string;
+        endDate?: string;
+        location?: string;
+        description?: string;
         heroImage?: { publicImage: boolean, link: string };
-        organizer: string;
+        organizer?: string;
         agenda?: { time: string; activity: string }[];
-        registrationUrl?: string;
+        buttonConfig?: { buttontext?: string, url?: string }
         themeColor: string;
     }
 

@@ -64,7 +64,11 @@ export const DEFAULT_EVENT_PAGE: EventPageData = {
     agenda: [
         { time: "09:00", activity: "Registration" },
         { time: "10:00", activity: "Keynote Speech" }
-    ]
+    ],
+    buttonConfig: {
+        url: "http://example.com",
+        buttontext: "Redirect"
+    }
 };
 
 export const DEFAULT_TEXT_PAGE: TextPageData = {
