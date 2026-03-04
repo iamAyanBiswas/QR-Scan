@@ -1,128 +1,187 @@
 'use client';
 
-import { useEffect, useRef, memo } from 'react';
-import EditorJS, { OutputData } from '@editorjs/editorjs';
-import Header from '@editorjs/header';
-import List from '@editorjs/list';
-import { headers } from 'next/headers';
+import { useEditor, EditorContent, Editor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
+import Link from '@tiptap/extension-link';
+import TextAlign from '@tiptap/extension-text-align';
+import Placeholder from '@tiptap/extension-placeholder';
+import {
+    Bold, Italic, Underline as UnderlineIcon, Strikethrough, Code,
+    Heading1, Heading2, Heading3,
+    List, ListOrdered, Quote, Minus,
+    Link as LinkIcon, Link2Off,
+    AlignLeft, AlignCenter, AlignRight,
+    Undo2, Redo2,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
-// type TextEditorProps = {
-//     data?: OutputData;
-//     onChange?: (data: OutputData) => void;
-// };
+// ─── Shared extensions (used by both editor & viewer) ────────────────────────
 
-export function TextEditor({ data, onChange }: any) {
-    const editorRef = useRef<EditorJS | null>(null);
-    const holderRef = useRef<HTMLDivElement>(null);
+const sharedExtensions = [
+    StarterKit.configure({
+        heading: { levels: [1, 2, 3] },
+    }),
+    Underline,
+    Link.configure({
+        openOnClick: false,
+        HTMLAttributes: { class: 'tiptap-link' },
+    }),
+    TextAlign.configure({
+        types: ['heading', 'paragraph'],
+    }),
+];
 
-    // We need to store the initial data to pass to EditorJS only once
-    const isMounted = useRef(false);
+// ─── Toolbar button ──────────────────────────────────────────────────────────
 
-    useEffect(() => {
-        if (!isMounted.current && !editorRef.current && holderRef.current) {
-            isMounted.current = true;
+type ToolbarBtnProps = {
+    icon: React.ElementType;
+    label: string;
+    active?: boolean;
+    disabled?: boolean;
+    onClick: () => void;
+};
 
-            const editor = new EditorJS({
-                holder: holderRef.current,
-                tools: {
-                    header: Header,
-                    list: List,
-                },
-                // Only pass data on initial render
-                data: data,
-                async onChange(api, event) {
-                    const content = await api.saver.save();
-                    onChange(content);
-                },
-            });
-
-            editorRef.current = editor;
-        }
-
-        return () => {
-            // Optional: You might want to skip destroying on every re-render
-            // But strict mode requires proper cleanup
-        };
-
-    }, []);
-
-    // Cleanup only on unmount
-    useEffect(() => {
-        return () => {
-            if (editorRef.current && editorRef.current.destroy) {
-                editorRef.current.destroy();
-                editorRef.current = null;
-            }
-        };
-    }, []);
-
+function ToolbarBtn({ icon: Icon, label, active, disabled, onClick }: ToolbarBtnProps) {
     return (
-        <div className="border-input dark:bg-input/30 focus-within:border-ring focus-within:ring-ring/50 rounded-xl border bg-transparent px-4 py-3 transition-colors focus-within:ring-[3px] min-h-30 w-full cursor-text">
-            <div ref={holderRef} className="prose dark:prose-invert max-w-none" />
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <button
+                    type="button"
+                    disabled={disabled}
+                    aria-label={label}
+                    aria-pressed={active}
+                    className={cn(
+                        'inline-flex items-center justify-center size-7 rounded-md text-muted-foreground',
+                        'transition-all duration-150 ease-out cursor-pointer',
+                        'hover:bg-accent hover:text-accent-foreground hover:scale-105',
+                        'disabled:opacity-30 disabled:pointer-events-none disabled:cursor-default',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                        active && 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground',
+                    )}
+                    onClick={onClick}
+                >
+                    <Icon className="size-3.5" />
+                </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">{label}</TooltipContent>
+        </Tooltip>
+    );
+}
+
+// ─── Button group wrapper ────────────────────────────────────────────────────
+
+function ToolbarGroup({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="flex items-center gap-0.5 rounded-lg bg-muted/50 p-0.5">
+            {children}
         </div>
     );
 }
 
-export const MemoizedTextEditor = memo(TextEditor, (prevProps, nextProps) => {
-    // Only re-render if initial data changes (which effectively never happens in this flow)
-    // or if the onChange handler changes (which shouldn't if useCallback is used)
-    return true; // Return true to prevent re-render always, as internal state handles updates
-});
+// ─── Toolbar ─────────────────────────────────────────────────────────────────
 
+function Toolbar({ editor }: { editor: Editor | null }) {
+    if (!editor) return null;
 
-
-
-export function TextViewer({ data }: { data: OutputData | undefined }) {
-    const editorRef = useRef<EditorJS | null>(null);
-    const holderRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (!holderRef.current) return;
-
-        if (!editorRef.current && data) {
-            const editor = new EditorJS({
-                holder: holderRef.current,
-                readOnly: true,
-                data: data,
-                tools: {
-                    header: Header,
-                    list: List,
-                },
-            });
-
-            editorRef.current = editor;
-        } else if (editorRef.current && data) {
-            // Debounce the update to prevent crashing on rapid changes
-            const validEditor = editorRef.current;
-            const timeoutId = setTimeout(() => {
-                validEditor.isReady.then(() => {
-                    // Check if editor is still mounted and valid
-                    if (editorRef.current === validEditor) {
-                        validEditor.render(data).catch(() => {
-                            // Ignore render errors from rapid updates
-                        });
-                    }
-                });
-            }, 300); // 300ms debounce
-
-            return () => clearTimeout(timeoutId);
+    const setLink = () => {
+        const prev = editor.getAttributes('link').href ?? '';
+        const url = window.prompt('Enter URL', prev);
+        if (url === null) return;
+        if (url === '') {
+            editor.chain().focus().extendMarkRange('link').unsetLink().run();
+            return;
         }
-
-        return () => {
-            if (editorRef.current && editorRef.current.destroy) {
-                editorRef.current.destroy();
-                editorRef.current = null;
-            }
-        };
-    }, [data]);
-
-    if (!data) {
-        return null;
-    }
+        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    };
 
     return (
-        <div className="border-input dark:bg-input/30 rounded-xl border bg-transparent px-4 py-3 min-h-30 w-full">
-            <div ref={holderRef} className="prose dark:prose-invert max-w-none" />
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-border/60 bg-muted/30 px-3 py-2">
+            {/* Text formatting */}
+            <ToolbarGroup>
+                <ToolbarBtn icon={Bold} label="Bold" active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()} />
+                <ToolbarBtn icon={Italic} label="Italic" active={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()} />
+                <ToolbarBtn icon={UnderlineIcon} label="Underline" active={editor.isActive('underline')} onClick={() => editor.chain().focus().toggleUnderline().run()} />
+                <ToolbarBtn icon={Strikethrough} label="Strikethrough" active={editor.isActive('strike')} onClick={() => editor.chain().focus().toggleStrike().run()} />
+                <ToolbarBtn icon={Code} label="Inline code" active={editor.isActive('code')} onClick={() => editor.chain().focus().toggleCode().run()} />
+            </ToolbarGroup>
+
+            {/* Headings */}
+            <ToolbarGroup>
+                <ToolbarBtn icon={Heading1} label="Heading 1" active={editor.isActive('heading', { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} />
+                <ToolbarBtn icon={Heading2} label="Heading 2" active={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} />
+                <ToolbarBtn icon={Heading3} label="Heading 3" active={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} />
+            </ToolbarGroup>
+
+            {/* Lists & blocks */}
+            <ToolbarGroup>
+                <ToolbarBtn icon={List} label="Bullet list" active={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} />
+                <ToolbarBtn icon={ListOrdered} label="Ordered list" active={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} />
+                <ToolbarBtn icon={Quote} label="Blockquote" active={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()} />
+                <ToolbarBtn icon={Minus} label="Horizontal rule" onClick={() => editor.chain().focus().setHorizontalRule().run()} />
+            </ToolbarGroup>
+
+            {/* Link */}
+            <ToolbarGroup>
+                <ToolbarBtn icon={LinkIcon} label="Set link" active={editor.isActive('link')} onClick={setLink} />
+                <ToolbarBtn icon={Link2Off} label="Remove link" disabled={!editor.isActive('link')} onClick={() => editor.chain().focus().unsetLink().run()} />
+            </ToolbarGroup>
+
+            {/* Alignment */}
+            <ToolbarGroup>
+                <ToolbarBtn icon={AlignLeft} label="Align left" active={editor.isActive({ textAlign: 'left' })} onClick={() => editor.chain().focus().setTextAlign('left').run()} />
+                <ToolbarBtn icon={AlignCenter} label="Align center" active={editor.isActive({ textAlign: 'center' })} onClick={() => editor.chain().focus().setTextAlign('center').run()} />
+                <ToolbarBtn icon={AlignRight} label="Align right" active={editor.isActive({ textAlign: 'right' })} onClick={() => editor.chain().focus().setTextAlign('right').run()} />
+            </ToolbarGroup>
+
+            {/* Undo / Redo */}
+            <ToolbarGroup>
+                <ToolbarBtn icon={Undo2} label="Undo" disabled={!editor.can().undo()} onClick={() => editor.chain().focus().undo().run()} />
+                <ToolbarBtn icon={Redo2} label="Redo" disabled={!editor.can().redo()} onClick={() => editor.chain().focus().redo().run()} />
+            </ToolbarGroup>
         </div>
     );
 }
+
+// ─── TextEditor ──────────────────────────────────────────────────────────────
+
+type TextEditorProps = {
+    data?: string;
+    onUpdate?: (data: string) => void;
+    className?: string;
+};
+
+export function TextEditor({ data, onUpdate, className }: TextEditorProps) {
+    const editor = useEditor({
+        immediatelyRender: false,
+        extensions: [
+            ...sharedExtensions,
+            Placeholder.configure({ placeholder: 'Start writing…' }),
+        ],
+        content: data ?? '',
+        onUpdate: ({ editor }) => {
+            onUpdate?.(editor.getHTML());
+        },
+        editorProps: {
+            attributes: {
+                class: 'tiptap-editor',
+            },
+        },
+    });
+
+    return (
+        <div className={cn(
+            'rounded-xl border border-border/60 bg-background overflow-hidden',
+            'shadow-sm transition-shadow duration-200',
+            'focus-within:shadow-md focus-within:border-ring/40',
+            className
+        )}>
+            <Toolbar editor={editor} />
+            <div className="px-4 py-3">
+                <EditorContent editor={editor} />
+            </div>
+        </div>
+    );
+}
+

@@ -1,26 +1,56 @@
 'use client'
-import React from "react";
+import { cn } from "@/lib/utils";
+import React, { useEffect } from "react";
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
+import Link from '@tiptap/extension-link';
+import TextAlign from '@tiptap/extension-text-align';
 
-export default function TextTemplate({ data }: { data: TextPageData }) {
-    if (!data) return null;
+// ─── Shared extensions (used by both editor & viewer) ────────────────────────
+
+const sharedExtensions = [
+    StarterKit.configure({
+        heading: { levels: [1, 2, 3] },
+    }),
+    Underline,
+    Link.configure({
+        openOnClick: false,
+        HTMLAttributes: { class: 'tiptap-link' },
+    }),
+    TextAlign.configure({
+        types: ['heading', 'paragraph'],
+    }),
+];
+// ─── TextTemplate (read-only preview) ──────────────────────────────────────────
+
+export default function TextTemplate({ data, className }: { data: TextPageData; className?: string }) {
+    const editor = useEditor({
+        immediatelyRender: false,
+        extensions: sharedExtensions,
+        content: data?.content ?? '',
+        editable: false,
+        editorProps: {
+            attributes: {
+                class: 'tiptap-viewer',
+            },
+        },
+    });
+
+    useEffect(() => {
+        if (editor && data !== undefined && data?.content !== editor.getHTML()) {
+            editor.commands.setContent(data.content);
+        }
+    }, [data, editor]);
 
     return (
-        <div
-            className="min-h-screen p-6 md:p-12 prose prose-lg dark:prose-invert max-w-2xl mx-auto"
-            style={{
-                backgroundColor: data.backgroundColor || "#ffffff",
-                color: data.textColor || "#000000"
-            }}>
-            {data.title && (
-                <h1 className="mb-8 font-bold border-b pb-4" style={{ borderColor: data.textColor ? `${data.textColor}30` : 'currentColor' }}>
-                    {data.title}
-                </h1>
-            )}
-
-            <div
-                className="leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: data.content || "" }}
-            />
+        <div className={cn(
+            'overflow-hidden',
+            className
+        )}>
+            <div className="px-4 py-3">
+                <EditorContent editor={editor} />
+            </div>
         </div>
     );
 }

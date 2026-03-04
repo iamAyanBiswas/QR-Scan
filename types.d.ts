@@ -4,8 +4,8 @@ declare global {
     type QrPageType = "couponPage" | "businessCard" | "menuCard" | "eventPage" | "textPage"
     type QRType = QrPageType | QrRedirectType
 
-    type DynamicPageData = CouponData | BusinessCardData | MenuData | EventPageData | TextPageData | SocialData | AppData | PaymentData | Url
-
+    type DynamicPageDataType = CouponData | BusinessCardData | MenuData | EventPageData | TextPageData
+    type DynamicRedirectDataType = AppData | PaymentData | Url
 
     interface CouponData {
         title: string;
@@ -66,15 +66,12 @@ declare global {
     }
 
     interface TextPageData {
-        title?: string;
-        content: string; // HTML or Markdown supported
-        backgroundColor: string;
-        textColor: string;
+        content: string;
+        themeColor: string;
     }
 
-
-
-    interface SocialData {
+    interface Url {
+        value: string;
     }
 
     interface AppData {
@@ -111,19 +108,12 @@ declare global {
         "type" | "width" | "height" | "data" | "nodeCanvas" | "jsdom" | "qrOptions"
     >;
 
-
-    interface Url {
-        value: string;
-    }
-
     interface QRCodeStyle {
         publicImage: boolean;
         template: string;
         style: QRStyleOptions;
         frame?: unknown;
     }
-
-
 
 }
 

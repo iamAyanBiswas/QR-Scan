@@ -67,20 +67,9 @@ export const DEFAULT_EVENT_PAGE: EventPageData = {
     ]
 };
 
-export const DEFAULT_MARKETING: MarketingData = {
-    headline: "Launch Your Product",
-    subheadline: "The best platform for growth.",
-    bodyText: "Start your journey today with our amazing tools.",
-    ctaIdentifier: "Get Started",
-    ctaUrl: "https://example.com/signup",
-    themeColor: "#7c3aed" // Violet
-};
-
 export const DEFAULT_TEXT_PAGE: TextPageData = {
-    title: "Information",
     content: "<h2>Welcome</h2><p>This is a simple text page. You can add <b>bold</b> text or links.</p>",
-    backgroundColor: "#ffffff",
-    textColor: "#000000"
+    themeColor: "#000000"
 };
 
 
