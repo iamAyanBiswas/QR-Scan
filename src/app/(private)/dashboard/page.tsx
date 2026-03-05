@@ -6,15 +6,13 @@ import { useRouter } from "next/navigation";
 import {
     MoreVertical,
     Plus,
-    BarChart2,
-    Calendar,
-    Edit,
+    ChartNoAxesCombined,
     Download,
     Copy,
     Trash2,
-    Eye,
     PauseCircle,
-    PlayCircle
+    PlayCircle,
+    BarChart2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -174,7 +172,7 @@ export default function Dashboard() {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-48">
                                         <DropdownMenuItem onClick={() => router.push(`/qr/${qr.id}/analytics`)}>
-                                            <BarChart2 className="mr-2 h-4 w-4" /> View Analytics
+                                            <ChartNoAxesCombined className="mr-2 h-4 w-4" /> View Analytics
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={handleDownload}>
                                             <Download className="mr-2 h-4 w-4" /> Download QR

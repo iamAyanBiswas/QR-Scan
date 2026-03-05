@@ -1,5 +1,8 @@
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/custom/sidebar"
+import { AppSidebar } from "@/components/custom/app-sidebar"
+import { ThemeProvider } from "@/components/theme-provider";
+import { ProfileDropdown } from "@/components/custom/profile";
+import { ModeToggle } from "@/components/custom/toggle";
 
 export default function DashboardLayout({
     children,
@@ -7,16 +10,29 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                    <SidebarTrigger className="-ml-1" />
-                </header>
-                <main className="flex flex-1 flex-col p-4 md:p-6 bg-main-50">
-                    {children}
-                </main>
-            </SidebarInset>
-        </SidebarProvider>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+            <SidebarProvider>
+                <AppSidebar />
+                <SidebarInset>
+                    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 flex h-16 shrink-0 items-center justify-between gap-2 px-4">
+                        <div className="flex items-center gap-2">
+                            <SidebarTrigger className="ml-1" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <ModeToggle />
+                            <ProfileDropdown variant="header" />
+                        </div>
+                    </header>
+                    <main className="flex flex-1 flex-col p-4 md:p-6 bg-main-50">
+                        {children}
+                    </main>
+                </SidebarInset>
+            </SidebarProvider>
+        </ThemeProvider>
     );
 }
