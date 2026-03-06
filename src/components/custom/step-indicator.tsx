@@ -41,7 +41,7 @@ export function StepIndicator({ currentStep, steps }: StepIndicatorProps) {
                                 <div className="mt-2 text-center">
                                     <p className={cn(
                                         "text-sm font-medium",
-                                        isActive ? "text-primary" : "text-muted-foreground"
+                                        isActive ? "text-foreground" : "text-muted-foreground"
                                     )}>
                                         {step.title}
                                     </p>

@@ -19,7 +19,7 @@ export default function DashboardLayout({
             <SidebarProvider>
                 <AppSidebar />
                 <SidebarInset>
-                    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 flex h-16 shrink-0 items-center justify-between gap-2 px-4">
+                    <header className="sticky top-0 z-50 w-full border-b bg-sidebar/95 backdrop-blur supports-backdrop-filter:bg-sidebar/60 flex h-16 shrink-0 items-center justify-between gap-2 px-4">
                         <div className="flex items-center gap-2">
                             <SidebarTrigger className="ml-1" />
                         </div>
@@ -28,7 +28,7 @@ export default function DashboardLayout({
                             <ProfileDropdown variant="header" />
                         </div>
                     </header>
-                    <main className="flex flex-1 flex-col p-4 md:p-6 bg-main-50">
+                    <main className="flex flex-1 flex-col p-4 md:p-6 bg-background">
                         {children}
                     </main>
                 </SidebarInset>
