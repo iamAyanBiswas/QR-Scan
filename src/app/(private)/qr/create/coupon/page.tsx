@@ -210,10 +210,24 @@ export default function CreateCouponQR() {
                         </div>
                         <div className="space-y-2">
                             <Label>Theme Color</Label>
-                            <div className="flex gap-2">
-                                <Input type="color" className="w-12 h-10 p-1" {...form.register("themeColor")} />
-                                <Input {...form.register("themeColor")} />
-                            </div>
+                            <Controller
+                                name="themeColor"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <div className="flex gap-2">
+                                        <Input
+                                            type="color"
+                                            className="w-12 h-10 p-1"
+                                            {...field}
+                                            value={field.value || "#000000"}
+                                        />
+                                        <Input
+                                            {...field}
+                                            value={field.value || ""}
+                                        />
+                                    </div>
+                                )}
+                            />
                             {form.formState.errors.themeColor && <p className="text-sm text-destructive">{form.formState.errors.themeColor.message}</p>}
                         </div>
                         <div className="space-y-2">
