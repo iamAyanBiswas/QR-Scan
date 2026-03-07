@@ -28,7 +28,7 @@ export default function DashboardLayout({
                             <ProfileDropdown variant="header" />
                         </div>
                     </header>
-                    <main className="flex flex-1 flex-col p-4 md:p-6 bg-background">
+                    <main className="flex flex-1 flex-col p-4 md:p-6 bg-muted dark:bg-background ">
                         {children}
                     </main>
                 </SidebarInset>
