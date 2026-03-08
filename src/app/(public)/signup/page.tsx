@@ -16,7 +16,7 @@ import { authClient } from "@/lib/auth-client"
 
 export default function SignupPage() {
   const continueWithGoogle = async () => {
-    await authClient.signIn.social({ provider: 'google' })
+    await authClient.signIn.social({ provider: 'google', callbackURL: '/dashboard' })
   }
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
