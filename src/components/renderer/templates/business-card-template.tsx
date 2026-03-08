@@ -3,6 +3,7 @@ import React from 'react';
 import { Mail, Phone, Globe, Linkedin, Twitter, Instagram, MapPin, User, Download } from 'lucide-react';
 import { RendererAvatar, RendererAvatarFallback, RendererAvatarImage } from "@/components/renderer/ui/avatar";
 import { RendererButton } from '@/components/renderer/ui/button';
+import Link from 'next/link';
 
 export default function BusinessCardTemplate({ data }: { data: BusinessCardData }) {
     const theme = data.themeColor || '#f41515'
@@ -76,24 +77,24 @@ END:VCARD`;
                 <div className="px-6 pb-8 space-y-4">
                     <div className="flex justify-center gap-4">
                         {data.email && (
-                            <a href={`mailto:${data.email}`} className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
+                            <Link href={`mailto:${data.email}`} className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <Mail className="w-5 h-5" />
-                            </a>
+                            </Link>
                         )}
                         {data.phone && (
-                            <a href={`tel:${data.phone}`} className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
+                            <Link href={`tel:${data.phone}`} className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <Phone className="w-5 h-5" />
-                            </a>
+                            </Link>
                         )}
                         {data.website && (
-                            <a href={data.website} target="_blank" className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
+                            <Link href={data.website} target="_blank" className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <Globe className="w-5 h-5" />
-                            </a>
+                            </Link>
                         )}
                         {/* {data.address && (
-                            <a href={`https://maps.google.com/?q=${data.address}`} target="_blank" className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
+                            <Link href={`https://maps.google.com/?q=${data.address}`} target="_blank" className="flex items-center justify-center w-10 aspect-square rounded-2xl bg-custom-theme/5 text-gray-700 hover:bg-custom-theme/15 hover:text-black transition-colors">
                                 <MapPin className="w-5 h-5" />
-                            </a>
+                            </Link>
                         )} */}
                     </div>
 
@@ -102,9 +103,9 @@ END:VCARD`;
 
                     {/* Socials */}
                     <div className="flex justify-center gap-4 text-gray-400">
-                        {data.linkedin && <a href={data.linkedin} target="_blank" className="text-[#0077b5]"><Linkedin className="w-5 h-5" /></a>}
-                        {data.twitter && <a href={data.twitter} target="_blank" className="text-[#1DA1F2]"><Twitter className="w-5 h-5" /></a>}
-                        {data.instagram && <a href={data.instagram} target="_blank" className="text-[#E1306C]"><Instagram className="w-5 h-5" /></a>}
+                        {data.linkedin && <Link href={data.linkedin} target="_blank" className="text-[#0077b5]"><Linkedin className="w-5 h-5" /></Link>}
+                        {data.twitter && <Link href={data.twitter} target="_blank" className="text-[#1DA1F2]"><Twitter className="w-5 h-5" /></Link>}
+                        {data.instagram && <Link href={data.instagram} target="_blank" className="text-[#E1306C]"><Instagram className="w-5 h-5" /></Link>}
                     </div>
 
                     <RendererButton
