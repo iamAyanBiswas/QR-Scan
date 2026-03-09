@@ -49,7 +49,6 @@ export default function CreateTextPageQR() {
     })
 
     const data = form.watch()
-    console.log(data)
 
     const handleCreate = async () => {
         const campaignValid = await campaignForm.trigger();
