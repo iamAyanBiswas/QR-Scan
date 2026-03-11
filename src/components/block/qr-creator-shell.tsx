@@ -121,10 +121,7 @@ export function QRCreatorShell({ children, shortId, step, shortUrl, previewSlot 
                 style: { ...qrCodeStyle.style, image: finalCustomOptions.image }
             };
 
-            const result = await updateQRCode(shortId, {
-                designStats: finalStyle,
-                isComplete: true
-            });
+            const result = await updateQRCode(shortId, { designStats: finalStyle });
 
             if (result.success) {
                 toast.success("QR Code Published!");

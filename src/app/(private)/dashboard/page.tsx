@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
     MoreVertical,
@@ -12,7 +11,9 @@ import {
     Trash2,
     PauseCircle,
     PlayCircle,
-    BarChart2
+    BarChart2,
+    Palette,
+    Pencil
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,10 +36,10 @@ import { cn } from "@/lib/utils";
 
 interface QRCode {
     id: string;
+    shortCode: string;
     title: string;
     description: string | null;
     status: string;
-    isComplete: boolean;
     designStats: any;
     createdAt: string;
     scans: number;
@@ -87,11 +88,6 @@ export default function Dashboard() {
         }
     };
 
-    const handleDuplicate = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        toast.info("Duplicate feature coming soon");
-    };
-
     const handleDownload = (e: React.MouseEvent) => {
         e.stopPropagation();
         toast.info("Download feature coming soon");
@@ -133,7 +129,7 @@ export default function Dashboard() {
                     <p className="text-muted-foreground mt-1">Manage your dynamic QR codes</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button onClick={() => router.push("/create")} className="shadow-lg shadow-primary/20">
+                    <Button onClick={() => router.push("/qr/create")} className="shadow-lg shadow-primary/20">
                         <Plus className="mr-2 h-4 w-4" /> Create New QR
                     </Button>
                 </div>
@@ -146,7 +142,7 @@ export default function Dashboard() {
                     </div>
                     <h3 className="text-xl font-medium">No QR Codes yet</h3>
                     <p className="text-muted-foreground mt-2 max-w-sm mx-auto">Create your first QR code to get started with tracking and analytics.</p>
-                    <Button onClick={() => router.push("/create")} className="mt-6" variant="outline">
+                    <Button onClick={() => router.push("/qr/create")} className="mt-6" variant="outline">
                         Create Now
                     </Button>
                 </div>
@@ -171,21 +167,14 @@ export default function Dashboard() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-48">
-                                        <DropdownMenuItem onClick={() => router.push(`/qr/${qr.id}/analytics`)}>
+                                        <DropdownMenuItem onClick={() => router.push(`/qr/analytics/${qr.id}`)}>
                                             <ChartNoAxesCombined className="mr-2 h-4 w-4" /> View Analytics
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={handleDownload}>
-                                            <Download className="mr-2 h-4 w-4" /> Download QR
+                                        <DropdownMenuItem onClick={() => { router.push(`/qr/update/style/${qr.id}`) }}>
+                                            <Palette className="mr-2 h-4 w-4" /> Update Style
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem>
-                                            {qr.status === 'active' ? (
-                                                <><PauseCircle className="mr-2 h-4 w-4" /> Pause Tracking</>
-                                            ) : (
-                                                <><PlayCircle className="mr-2 h-4 w-4" /> Activate</>
-                                            )}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={handleDuplicate}>
-                                            <Copy className="mr-2 h-4 w-4" /> Duplicate
+                                        <DropdownMenuItem onClick={() => { router.push(`/qr/update/content/${qr.id}`) }}>
+                                            <Pencil className="mr-2 h-4 w-4" /> Update Content
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
@@ -205,7 +194,7 @@ export default function Dashboard() {
                                 >
                                     <div className="relative w-full h-full flex items-center justify-center transform group-hover:scale-101 transition-transform duration-300">
                                         <QRCodeDisplay
-                                            data={`${process.env.NEXT_PUBLIC_SHORT_DOMAIN}/${qr.id}`}
+                                            data={`${process.env.NEXT_PUBLIC_SHORT_DOMAIN}/${qr.shortCode}`}
                                             options={{
                                                 ...qr.designStats,
                                                 width: 200,
@@ -251,7 +240,7 @@ export default function Dashboard() {
                                         variant="outline"
                                         size="sm"
                                         className="h-8 gap-1.5"
-                                        onClick={() => router.push(`/qr/${qr.id}/content`)}
+                                        onClick={handleDownload}
                                     >
                                         <Download className="h-3.5 w-3.5" /> Download
                                     </Button>

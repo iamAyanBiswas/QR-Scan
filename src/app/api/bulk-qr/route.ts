@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { qrcodes } from "@/db/qr.schema";
+import { qrcodes } from "@/db/qr/qr.schema";
 import { eq, desc } from "drizzle-orm";
 
 export async function GET(req: Request) {
@@ -20,9 +20,9 @@ export async function GET(req: Request) {
             orderBy: [desc(qrcodes.createdAt)],
             columns: {
                 id: true,
+                shortCode: true,
                 title: true,
                 status: true,
-                isComplete: true,
                 designStats: true,
                 createdAt: true,
                 type: true,

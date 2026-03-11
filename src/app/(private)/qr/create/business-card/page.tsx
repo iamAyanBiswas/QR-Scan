@@ -116,10 +116,10 @@ export default function CreateBusinessCardQR() {
                 expiresAt: expiresAt ? new Date(expiresAt) : null,
             });
 
-            if (result.success && result.id) {
+            if (result.success && result.id && result.shortCode) {
                 setShortId(result.id);
                 const domain = process.env.NEXT_PUBLIC_SHORT_DOMAIN;
-                const finalUrl = `${domain}/${result.id}`;
+                const finalUrl = `${domain}/${result.shortCode}`;
                 setShortUrl(finalUrl);
                 setStep(2);
                 toast.success("Content saved! Now customize your design.");

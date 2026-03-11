@@ -26,7 +26,7 @@ export default async function ShortLinkPage({
     // Optimized Approach: Fetch first (fast read), then atomic increment.
     // Why? checks expiration, status, etc.
     const qr = await db.query.qrcodes.findFirst({
-        where: eq(qrcodes.id, shortId)
+        where: eq(qrcodes.shortCode, shortId)
     });
 
     if (!qr) {
@@ -50,7 +50,7 @@ export default async function ShortLinkPage({
     // We await it to ensure it counts.
     await db.update(qrcodes)
         .set({ scans: sql`${qrcodes.scans} + 1` })
-        .where(eq(qrcodes.id, shortId));
+        .where(eq(qrcodes.shortCode, shortId));
 
     // 4. Redirect / Render
     if (qr.type === "URL") {

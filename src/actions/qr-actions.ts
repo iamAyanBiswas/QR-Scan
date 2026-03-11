@@ -33,8 +33,8 @@ export async function createQRCode(data: {
         // Construct the full short URL for reference (optional, we scan the ID)
         // const shortUrl = `${process.env.NEXT_PUBLIC_SHORT_DOMAIN}/${shortId}`;
 
-        await db.insert(qrcodes).values({
-            id: shortId,
+        const [inserted] = await db.insert(qrcodes).values({
+            shortCode: shortId,
             userId: session.user.id,
             title: data.title,
             type: data.type,
@@ -43,11 +43,10 @@ export async function createQRCode(data: {
             scanLimit: data.scanLimit || 0,
             expiresAt: data.expiresAt || null,
             status: "active",
-            isComplete: false,
-        });
+        }).returning({ id: qrcodes.id });
 
         revalidatePath("/dashboard");
-        return { success: true, id: shortId };
+        return { success: true, id: inserted.id, shortCode: shortId };
     } catch (error) {
         console.error("Create QR Error:", error);
         return { success: false, error: "Failed to create QR code" };

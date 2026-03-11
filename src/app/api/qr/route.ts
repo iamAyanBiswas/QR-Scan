@@ -2,8 +2,12 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { qrcodes } from "@/db/qr.schema";
+import { qrcodes } from "@/db/qr/qr.schema";
 import { eq, and } from "drizzle-orm";
+
+export async function GET() {
+
+}
 
 // Delete QR Code
 export async function DELETE(req: Request) {
