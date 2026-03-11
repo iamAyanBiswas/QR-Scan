@@ -1,9 +1,9 @@
 export * from '@/db/auth/auth.schema'
-export * from '@/db/qr.schema'
+export * from '@/db/qr/qr.schema'
 
 import { relations } from 'drizzle-orm';
 import { user, session, account } from '@/db/auth/auth.schema'
-import { qrcodes } from '@/db/qr.schema'
+import { qrcodes } from '@/db/qr/qr.schema'
 
 export const userRelations = relations(user, ({ many }) => ({
     sessions: many(session),

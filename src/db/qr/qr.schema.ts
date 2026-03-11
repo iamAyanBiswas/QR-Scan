@@ -1,10 +1,11 @@
-import { pgTable, text, integer, timestamp, jsonb, index, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, timestamp, jsonb, index, boolean, uuid } from "drizzle-orm/pg-core";
 import { user } from "@/db/auth/auth.schema";
 
 export const qrcodes = pgTable(
     "qrcodes",
     {
-        id: text("id").primaryKey(), // The Short Code
+        id: uuid("id").primaryKey().defaultRandom(),
+        shortCode: text("short_code").notNull().unique(), // The Short Code
         userId: text("user_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
@@ -17,12 +18,14 @@ export const qrcodes = pgTable(
         dynamicData: jsonb("dynamic_data"), // Stores Page Content
         designStats: jsonb("design_stats"), // Stores QR Styling
         status: text("status").default("active").notNull(), // active, paused, archived
-        isComplete: boolean("is_complete").default(false).notNull(),
         createdAt: timestamp("created_at").defaultNow().notNull(),
         updatedAt: timestamp("updated_at")
             .defaultNow()
             .$onUpdate(() => new Date())
             .notNull(),
     },
-    (table) => [index("qrcodes_userId_idx").on(table.userId)]
+    (table) => [
+        index("qrcodes_userId_idx").on(table.userId),
+        index("qrcodes_shortCode_idx").on(table.shortCode)
+    ]
 );
