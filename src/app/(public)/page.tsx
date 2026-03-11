@@ -23,9 +23,9 @@ export default function Home() {
           <div className="flex flex-col lg:flex-row justify-between items-center gap-16 lg:gap-8">
             {/* Hero Content */}
             <div className="w-full max-w-2xl flex flex-col items-center lg:items-start text-center lg:text-left lg:w-[45%]">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1]">
-                Edit destinations. <br />
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-blue-400">Keep the code.</span>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.1] pb-2">
+                One QR Code. <br />
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-blue-400 to-indigo-500">Infinite Destinations.</span>
               </h1>
               <p className="mt-6 text-lg leading-8 text-muted-foreground max-w-lg">
                 The enterprise standard for dynamic QR management. Track every scan, retarget users, and update campaigns instantly without reprinting collateral.
