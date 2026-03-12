@@ -13,12 +13,10 @@ export default async function ShortLinkPage({
     const { shortId } = await params;
 
     // 1. Atomic Update Logic
-    // "Update scans = scans + 1 WHERE id = shortId AND scans < scanLimit"
+    // "Update scans = scans + 1 WHERE id = shortId"
     // Also check if ExpiresAt is in the future (or null)
     // We might need to do a finding first to check expiration cleanly, 
     // or we can do it in one query if we are clever. 
-    // BUT 'scanLimit' = 0 means unlimited.
-    // So the condition is: (scanLimit == 0 OR scans < scanLimit)
 
     // Let's fetch the QR first to check logic simpler (Atomic update is for concurrency, but a slight read-before-write here for checking expiration is acceptable for MVP, 
     // OR we can do the robust raw SQL update).
@@ -40,10 +38,6 @@ export default async function ShortLinkPage({
 
     if (qr.expiresAt && new Date() > qr.expiresAt) {
         return redirect("/expired?reason=expired");
-    }
-
-    if (qr.scanLimit > 0 && qr.scans >= qr.scanLimit) {
-        return redirect("/expired?reason=limit");
     }
 
     // 3. Atomic Increment (Fire and Forget or Await)

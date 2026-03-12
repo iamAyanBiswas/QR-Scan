@@ -13,7 +13,6 @@ export const qrcodes = pgTable(
         description: text("description"),
         type: text("type").notNull(), // URL, COUPON, VCARD
         scans: integer("scans").default(0).notNull(),
-        scanLimit: integer("scan_limit").default(0).notNull(), // 0 = unlimited
         expiresAt: timestamp("expires_at"),
         dynamicData: jsonb("dynamic_data"), // Stores Page Content
         designStats: jsonb("design_stats"), // Stores QR Styling

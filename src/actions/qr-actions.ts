@@ -15,7 +15,6 @@ export async function createQRCode(data: {
     type: QRType;
     dynamicData: any;
     designStats: any;
-    scanLimit?: number;
     expiresAt?: Date | null;
 }) {
     const session = await auth.api.getSession({
@@ -40,7 +39,6 @@ export async function createQRCode(data: {
             type: data.type,
             dynamicData: data.dynamicData,
             designStats: data.designStats,
-            scanLimit: data.scanLimit || 0,
             expiresAt: data.expiresAt || null,
             status: "active",
         }).returning({ id: qrcodes.id });
