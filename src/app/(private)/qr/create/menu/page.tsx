@@ -99,7 +99,7 @@ export default function CreateMenuQR() {
             // Step 1: Create Draft
             const result = await createQRCode({
                 title: title || "Untitled QR",
-                type: "app",
+                type: "menuCard",
                 dynamicData: dynamicData,
                 designStats: {},
                 expiresAt: expiresAt ? new Date(expiresAt) : null,

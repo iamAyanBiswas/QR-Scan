@@ -99,7 +99,7 @@ export default function CreateCouponQR() {
             // Step 1: Create Draft
             const result = await createQRCode({
                 title: title,
-                type: "app",
+                type: "couponPage",
                 dynamicData: dynamicData,
                 designStats: {},
                 expiresAt: expiresAt ? new Date(expiresAt) : null,

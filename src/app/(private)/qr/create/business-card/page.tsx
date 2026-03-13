@@ -110,7 +110,7 @@ export default function CreateBusinessCardQR() {
             // Step 1: Create Draft
             const result = await createQRCode({
                 title: title || "Untitled QR",
-                type: "app",
+                type: "businessCard",
                 dynamicData: dynamicData,
                 designStats: {},
                 expiresAt: expiresAt ? new Date(expiresAt) : null,

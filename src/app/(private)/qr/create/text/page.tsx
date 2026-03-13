@@ -63,7 +63,7 @@ export default function CreateTextPageQR() {
             // Step 1: Create Draft
             const result = await createQRCode({
                 title: title,
-                type: "app",
+                type: "textPage",
                 dynamicData: data,
                 designStats: {},
                 expiresAt: expiresAt ? new Date(expiresAt) : null,
