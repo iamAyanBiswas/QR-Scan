@@ -1,9 +1,9 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { qrcodes } from "@/db/qr/qr.schema";
 import { eq, desc } from "drizzle-orm";
+import { ApiSuccess, ApiError } from "@/lib/api-response";
 
 export async function GET(req: Request) {
     try {
@@ -12,7 +12,7 @@ export async function GET(req: Request) {
         });
 
         if (!session) {
-            return new NextResponse("Unauthorized", { status: 401 });
+            return ApiError("Unauthorized", "You must be logged in to access this resource", 401);
         }
 
         const userQrCodes = await db.query.qrcodes.findMany({
@@ -30,9 +30,9 @@ export async function GET(req: Request) {
             }
         });
 
-        return NextResponse.json(userQrCodes, { status: 200 });
+        return ApiSuccess(userQrCodes, "QR codes fetched successfully", 200);
     } catch (error) {
         console.error("[BULK_QR_GET]", error);
-        return new NextResponse("Internal Error", { status: 500 });
+        return ApiError("Internal Error", "An unexpected error occurred", 500);
     }
 }

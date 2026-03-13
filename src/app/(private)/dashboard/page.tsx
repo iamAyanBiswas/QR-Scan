@@ -59,8 +59,8 @@ export default function Dashboard() {
         try {
             const res = await fetch("/api/bulk-qr");
             if (!res.ok) throw new Error("Failed to fetch QR codes");
-            const data = await res.json();
-            setQrCodes(data);
+            const response = await res.json();
+            setQrCodes(response.data);
         } catch (error) {
             console.error("Error fetching QR codes:", error);
             toast.error("Failed to load QR codes");

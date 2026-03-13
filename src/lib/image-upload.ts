@@ -12,11 +12,11 @@ export async function imageUploadInR2(imageFile: File): Promise<{ success: true,
                 }
             )
         })
-        const data = await presignResponse.json()
+        const response = await presignResponse.json()
         if (!presignResponse.ok) {
-            throw new Error(data.message || 'Unable to create image upload link')
+            throw new Error(response.message || 'Unable to create image upload link')
         }
-        const r2UploadResponse = await fetch(data.presignedUrl as string, {
+        const r2UploadResponse = await fetch(response.data.presignedUrl as string, {
             method: "PUT",
             headers: {
                 "Content-Type": imageFile.type,
@@ -26,7 +26,7 @@ export async function imageUploadInR2(imageFile: File): Promise<{ success: true,
         if (!r2UploadResponse.ok) {
             throw new Error("Unable to upload image")
         }
-        return { success: true, key: data.key as string }
+        return { success: true, key: response.data.key as string }
     } catch (error) {
         return { success: false, message: error }
     }
