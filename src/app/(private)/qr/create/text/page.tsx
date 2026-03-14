@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { createQRCode } from "@/actions/qr-actions";
 import { toast } from "sonner";
+import { DateTimePicker } from "@/components/custom/date-time-picker";
 
 
 const campaignSchema = z.object({
@@ -53,7 +54,6 @@ export default function CreateTextPageQR() {
     const handleCreate = async () => {
         const campaignValid = await campaignForm.trigger();
         const formValid = await form.trigger();
-        console.log(form.formState.errors)
         if (!campaignValid || !formValid) return;
 
         const { title, expiresAt } = campaignForm.getValues();
@@ -120,11 +120,12 @@ export default function CreateTextPageQR() {
                         render={({ field }) => (
                             <div className="space-y-2">
                                 <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
-                                <Input
+                                <DateTimePicker
                                     id="qr-expiry"
-                                    type="datetime-local"
                                     value={field.value}
                                     onChange={field.onChange}
+                                    placeholder="Set expiry date & time"
+                                    fromDate={new Date()}
                                 />
                                 <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
                             </div>

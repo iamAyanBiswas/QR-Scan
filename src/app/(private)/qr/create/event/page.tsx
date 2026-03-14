@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Calendar, Trash2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { imageUploadInR2 } from "@/lib/image-upload";
+import { DateTimePicker } from "@/components/custom/date-time-picker";
 
 const campaignSchema = z.object({
     title: z.string().min(1, "Campaign name is required").max(100, "Length should not more then 100"),
@@ -200,11 +201,12 @@ export default function CreateEventQR() {
                         render={({ field }) => (
                             <div className="space-y-2">
                                 <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
-                                <Input
+                                <DateTimePicker
                                     id="qr-expiry"
-                                    type="datetime-local"
                                     value={field.value}
                                     onChange={field.onChange}
+                                    placeholder="Set expiry date & time"
+                                    fromDate={new Date()}
                                 />
                                 <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
                             </div>

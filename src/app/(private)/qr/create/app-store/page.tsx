@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 import { IconImageInput } from "@/components/custom/input";
+import { DateTimePicker } from "@/components/custom/date-time-picker";
 
 import { QRCreatorShell } from "@/components/block/qr-creator-shell";
 import { RedirectPreview } from "@/components/block/redirect-preview";
@@ -137,11 +138,12 @@ export default function CreateAppStoreQR() {
                         render={({ field }) => (
                             <div className="space-y-2">
                                 <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
-                                <Input
+                                <DateTimePicker
                                     id="qr-expiry"
-                                    type="datetime-local"
                                     value={field.value}
                                     onChange={field.onChange}
+                                    placeholder="Set expiry date & time"
+                                    fromDate={new Date()}
                                 />
                                 <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
                             </div>

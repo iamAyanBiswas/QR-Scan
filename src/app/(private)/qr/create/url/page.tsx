@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import { createQRCode } from "@/actions/qr-actions";
 
 import { UtmUrlInput } from "@/components/custom/utm-url-input";
+import { DateTimePicker } from "@/components/custom/date-time-picker";
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -131,11 +132,12 @@ export default function CreateUrlQR() {
                         render={({ field }) => (
                             <div className="space-y-2">
                                 <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
-                                <Input
+                                <DateTimePicker
                                     id="qr-expiry"
-                                    type="datetime-local"
                                     value={field.value}
                                     onChange={field.onChange}
+                                    placeholder="Set expiry date & time"
+                                    fromDate={new Date()}
                                 />
                                 <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
                             </div>

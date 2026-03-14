@@ -15,6 +15,7 @@ import { imageUploadInR2 } from "@/lib/image-upload";
 
 import { QRCreatorShell } from "@/components/block/qr-creator-shell";
 import { PagePreview } from "@/components/block/page-preview";
+import { DateTimePicker } from "@/components/custom/date-time-picker";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -167,11 +168,12 @@ export default function CreateBusinessCardQR() {
                         render={({ field }) => (
                             <div className="space-y-2">
                                 <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
-                                <Input
+                                <DateTimePicker
                                     id="qr-expiry"
-                                    type="datetime-local"
                                     value={field.value}
                                     onChange={field.onChange}
+                                    placeholder="Set expiry date & time"
+                                    fromDate={new Date()}
                                 />
                                 <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
                             </div>

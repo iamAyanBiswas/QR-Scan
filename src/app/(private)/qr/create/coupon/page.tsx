@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QRCreatorShell } from "@/components/block/qr-creator-shell";
 import { PagePreview } from "@/components/block/page-preview";
+import { DateTimePicker } from "@/components/custom/date-time-picker";
 import { DEFAULT_COUPON, QR_PAGE_TITLE } from "@/config/qr-page-builder";
 import { z } from "zod"
 import { Controller, useForm } from "react-hook-form";
@@ -156,11 +157,12 @@ export default function CreateCouponQR() {
                         render={({ field }) => (
                             <div className="space-y-2">
                                 <Label htmlFor="qr-expiry">Expiration Date (Optional)</Label>
-                                <Input
+                                <DateTimePicker
                                     id="qr-expiry"
-                                    type="datetime-local"
                                     value={field.value}
                                     onChange={field.onChange}
+                                    placeholder="Set expiry date & time"
+                                    fromDate={new Date()}
                                 />
                                 <p className="text-xs text-muted-foreground">Set when the QR code expires</p>
                             </div>
