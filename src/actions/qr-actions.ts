@@ -39,7 +39,7 @@ export async function createQRCode(data: {
             type: data.type,
             dynamicData: data.dynamicData,
             designStats: data.designStats,
-            expiresAt: data.expiresAt || null,
+            expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
             status: "active",
         }).returning({ id: qrcodes.id });
 
@@ -61,6 +61,11 @@ export async function updateQRCode(id: string, data: Partial<typeof qrcodes.$inf
     }
 
     try {
+        // Safely convert date strings to Date objects for Drizzle ORM
+        if (data.expiresAt && typeof data.expiresAt === "string") {
+            data.expiresAt = new Date(data.expiresAt);
+        }
+
         await db.update(qrcodes)
             .set(data)
             .where(eq(qrcodes.id, id));

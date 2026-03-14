@@ -91,6 +91,11 @@ export async function PATCH(req: Request) {
             return ApiSuccess(qr, "No data provided for update", 200);
         }
 
+        // Convert date strings to Date objects for Drizzle ORM
+        if (data.expiresAt && typeof data.expiresAt === "string") {
+            data.expiresAt = new Date(data.expiresAt);
+        }
+
         // Add proper update time
         data.updatedAt = new Date();
 
