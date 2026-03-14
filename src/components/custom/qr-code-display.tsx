@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import QRCodeStyling, { Options } from "qr-code-styling";
+import React, { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import QRCodeStyling, { Options, FileExtension } from "qr-code-styling";
 
 interface QRCodeDisplayProps {
     data: string;
@@ -10,24 +10,37 @@ interface QRCodeDisplayProps {
     className?: string; // Allow custom classes for container
 }
 
-export default function QRCodeDisplay({ data, options, size = 200, className }: QRCodeDisplayProps) {
-    const ref = useRef<HTMLDivElement>(null);
-    const qrCode = useRef<QRCodeStyling | null>(null);
+export interface QRCodeDisplayRef {
+    download: (extension?: FileExtension) => void;
+}
 
-    useEffect(() => {
-        // Initialize QRCodeStyling instance
-        qrCode.current = new QRCodeStyling({
-            width: size,
-            height: size,
-            data: data,
-            ...options,
-        });
+const QRCodeDisplay = forwardRef<QRCodeDisplayRef, QRCodeDisplayProps>(
+    ({ data, options, size = 200, className }, ref) => {
+        const containerRef = useRef<HTMLDivElement>(null);
+        const qrCode = useRef<QRCodeStyling | null>(null);
 
-        // Append to div
-        if (ref.current) {
-            qrCode.current.append(ref.current);
-        }
-    }, []);
+        useImperativeHandle(ref, () => ({
+            download: (extension: FileExtension = "png") => {
+                if (qrCode.current) {
+                    qrCode.current.download({ extension });
+                }
+            }
+        }));
+
+        useEffect(() => {
+            // Initialize QRCodeStyling instance
+            qrCode.current = new QRCodeStyling({
+                width: size,
+                height: size,
+                data: data,
+                ...options,
+            });
+
+            // Append to div
+            if (containerRef.current) {
+                qrCode.current.append(containerRef.current);
+            }
+        }, []);
 
     useEffect(() => {
         if (!qrCode.current) return;
@@ -39,5 +52,10 @@ export default function QRCodeDisplay({ data, options, size = 200, className }: 
         });
     }, [data, options, size]); // Update on changes
 
-    return <div ref={ref} className={className} />;
-}
+        return <div ref={containerRef} className={className} />;
+    }
+);
+
+QRCodeDisplay.displayName = "QRCodeDisplay";
+
+export default QRCodeDisplay;
