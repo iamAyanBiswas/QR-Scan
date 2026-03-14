@@ -1,4 +1,3 @@
-import React from "react";
 import CouponTemplate from "@/components/renderer/templates/coupon-template";
 import BusinessCardTemplate from "@/components/renderer/templates/business-card-template";
 import MenuTemplate from "@/components/renderer/templates/menu-template";
@@ -15,7 +14,7 @@ type PagePreviewProps =
 
 export function PagePreview({ type, data }: PagePreviewProps) {
     return (
-        <div className="relative mx-auto border-12 border-zinc-900 dark:border-zinc-700 rounded-[3rem] overflow-hidden shadow-2xl max-w-75 aspect-9/19 ring-1 ring-black/10">
+        <div className="relative mx-auto border-12 border-zinc-900 dark:border-zinc-700 rounded-[3rem] overflow-hidden shadow-2xl w-75 h-157.5 ring-1 ring-black/10">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-6 bg-zinc-900 dark:bg-zinc-700 rounded-b-xl z-20"></div>
             <div className="absolute inset-0 overflow-y-auto custom-scrollbar bg-white">
                 {type === "couponPage" && <div className="origin-top w-full"><CouponTemplate data={data} /></div>}
